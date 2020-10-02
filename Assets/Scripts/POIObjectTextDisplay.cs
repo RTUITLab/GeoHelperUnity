@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Class for initialize prefab POIObjectTextCanvas
+/// </summary>
 public class POIObjectTextDisplay : MonoBehaviour
 {
     public TextMeshProUGUI title;

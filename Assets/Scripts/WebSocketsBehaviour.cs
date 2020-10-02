@@ -11,6 +11,11 @@ public class WebSocketsBehaviour : MonoBehaviour
 {
     private static ClientWebSocket _client;
     private Uri _senseServerURI;
+
+    /// <summary>
+    /// Simple semaphore for checking state of actions of websocket connection
+    /// to do next action with websocket connection
+    /// </summary>
     private static bool connectionFree = true;
 
 
@@ -21,9 +26,6 @@ public class WebSocketsBehaviour : MonoBehaviour
         _client = new ClientWebSocket();
         _senseServerURI = new Uri(webSocketConnectionString);
         await ConnectToSenseServer();
-        //string tempReq = "{ \"lat\": 34.4556, \"lng\": 56.3835}";
-
-
     }
 
     private async void Update()
@@ -33,6 +35,7 @@ public class WebSocketsBehaviour : MonoBehaviour
             await TryToConnectToServer();
         }
     }
+
     public string GetWSConnectionState()
     {
         return _client.State.ToString();
@@ -47,11 +50,16 @@ public class WebSocketsBehaviour : MonoBehaviour
                 byte[] bytes = Encoding.UTF8.GetBytes(jsonRequestString);
                 ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
 
+                // lock semaphore
                 connectionFree = false;
+
                 await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 //Debug.Log($"Sended location request: {jsonRequestString}");
+
+                // unlock semaphore
                 connectionFree = true;
+
                 return;
             }
             else if (_client != null && (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
@@ -88,9 +96,13 @@ public class WebSocketsBehaviour : MonoBehaviour
 
                 byte[] buffer = new byte[65536];
                 var segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-                WebSocketReceiveResult recvResult;
+
+                // lock semaphore
                 connectionFree = false;
-                recvResult = await _client.ReceiveAsync(segment, CancellationToken.None);
+
+                await _client.ReceiveAsync(segment, CancellationToken.None);
+
+                // unlock semaphore
                 connectionFree = true;
 
                 string jsonString = Encoding.UTF8.GetString(segment.Array);
