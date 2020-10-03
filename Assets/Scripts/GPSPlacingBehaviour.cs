@@ -41,6 +41,16 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        // force geoobjects type "text" look at camera
+        List<POIObjectTextDisplay> foundObjectsInScene = new List<POIObjectTextDisplay>(FindObjectsOfType<POIObjectTextDisplay>());
+        foundObjectsInScene.ForEach((POIObjectTextDisplay el) =>
+        {
+            el.transform.LookAt(Camera.main.transform);
+        });
+    }
+
     private async void LateUpdate()
     {
         if (webSockets.GetWSConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
@@ -146,10 +156,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
                                 {
                                     GPSEncoder.SetLocalOrigin(new Vector2(lastKnownLocation.lat, lastKnownLocation.lng));
                                     var objectPlace = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
-                                    var rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
 
                                     GameObject newGameobject = Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
-                                    newGameobject.transform.rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
+
+                                    newGameobject.transform.LookAt(Camera.main.transform);
 
                                     Debug.Log($"Distance to {el.name}" +
                                         $" {DistanceBetween2Geoobjects(lastKnownLocation.lat, lastKnownLocation.lng, el.position.lat, el.position.lng)}");
