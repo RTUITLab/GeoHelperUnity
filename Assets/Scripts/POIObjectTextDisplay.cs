@@ -10,13 +10,13 @@ public class POIObjectTextDisplay : MonoBehaviour
 {
     public TextMeshProUGUI title;
     public TextMeshProUGUI description;
-    public TextMeshProUGUI location;
+    public TextMeshProUGUI distance;
 
-    public void Initialize(GeoObject geoObject)
+    public void Initialize(GeoObject geoObject, double distance)
     {
         this.title.text = geoObject.name;
         this.description.text = geoObject.description;
-        this.location.text = "Location: " + geoObject.position.lat.ToString() + ", " + geoObject.position.lng.ToString();
+        this.distance.text = distance.ToString() + " meters";
         Debug.Log("initialized " + geoObject.name);
     }
 }

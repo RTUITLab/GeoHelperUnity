@@ -72,7 +72,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
             {
                 searchObj.transform.position = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
                 Debug.Log($"Update object position of {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
-                Debug.Log($"Distance to {el.name} {DistanceBetween2Geoobjects(lat, lng, el.position.lat, el.position.lng)}");
+                Debug.Log($"Distance to {el.name} {DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng)}");
             }
         });
     }
@@ -160,11 +160,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
                                     newGameobject.transform.LookAt(Camera.main.transform);
 
-                                    Debug.Log($"Distance to {el.name}" +
-                                        $" {DistanceBetween2Geoobjects(lastKnownLocation.lat, lastKnownLocation.lng, el.position.lat, el.position.lng)}");
+                                    double distanceToObject = DistanceBetween2GeoobjectsInM(lastKnownLocation.lat, lastKnownLocation.lng, el.position.lat, el.position.lng);
 
-                                    // init content of geoobject(point of interest)
-                                    newGameobject.GetComponent<POIObjectTextDisplay>().Initialize(el);
+                                    Debug.Log($"Distance to {el.name} {distanceToObject}m");
+
+                                // init content of geoobject(point of interest)
+                                newGameobject.GetComponent<POIObjectTextDisplay>().Initialize(el, distanceToObject);
                                     Debug.Log($"Placed object {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
                                 }
 
@@ -239,7 +240,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         Input.location.Stop();
     }
 
-    private double DistanceBetween2Geoobjects(double lat1, double long1, double lat2, double long2)
+    private double DistanceBetween2GeoobjectsInM(double lat1, double long1, double lat2, double long2)
     {
         double _eQuatorialEarthRadius = 6378.1370D;
         double _d2r = (Math.PI / 180D);

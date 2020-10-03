@@ -684,7 +684,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: {fileID: 6535679806714028935}
   description: {fileID: 1329506144246785880}
-  location: {fileID: 3179236320051295323}
+  distance: {fileID: 3179236320051295323}
 --- !u!1 &8252375906636876798
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,7 +770,7 @@ GameObject:
   - component: {fileID: 351631363735251113}
   - component: {fileID: 3179236320051295323}
   m_Layer: 5
-  m_Name: Location
+  m_Name: Distance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -823,7 +823,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Location
+  m_text: Distance
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ca8b93acf57af4c0290c735e1cfe0de1, type: 2}
   m_sharedMaterial: {fileID: -6458339028785663914, guid: ca8b93acf57af4c0290c735e1cfe0de1,
