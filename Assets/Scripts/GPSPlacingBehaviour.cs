@@ -38,7 +38,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         RunGPSTracking();
         webSockets = GetComponent<WebSocketsBehaviour>();
-
     }
 
     private void Update()
