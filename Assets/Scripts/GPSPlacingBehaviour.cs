@@ -72,7 +72,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
             {
                 searchObj.transform.position = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
                 Debug.Log($"Update object position of {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
-                Debug.Log($"Distance to {el.name} {DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng)}");
+                double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng);
+
+                searchObj.distance.text = distanceToObject.ToString() + " meters";
+
+                Debug.Log($"Updated Distance to {el.name} {distanceToObject}m");
             }
         });
     }
