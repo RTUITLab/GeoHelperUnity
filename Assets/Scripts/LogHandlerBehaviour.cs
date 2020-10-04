@@ -24,9 +24,9 @@ public class LogHandlerBehaviour : MonoBehaviour
         output = logString;
         stack = stackTrace;
         myLog = output + "\n" + myLog;
-        if (myLog.Length > 500)
+        if (myLog.Length > 2000)
         {
-            myLog = myLog.Substring(0, 400);
+            myLog = myLog.Substring(0, 1800);
         }
     }
 

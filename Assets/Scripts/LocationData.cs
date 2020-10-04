@@ -30,6 +30,4 @@ public class GeoObject
     public string type;
     public string description;
     public LocationData position;
-
-
 }
