@@ -17,7 +17,7 @@ public class POIObjectTextDisplay : MonoBehaviour
     {
         this.title.text = geoObject.name;
         this.description.text = geoObject.description;
-        this.distance.text = Int16.Parse(distance.ToString()).ToString() + " meters";
+        this.distance.text = Convert.ToUInt32(distance).ToString() + " meters";
         Debug.Log("initialized " + geoObject.name);
     }
 }
