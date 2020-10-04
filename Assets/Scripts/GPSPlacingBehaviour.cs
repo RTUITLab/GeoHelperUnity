@@ -165,7 +165,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                             if (!packGeoObjectsFromServer.Any(g => g.name == el.name))
                             {
                                 geoObjectsInSceneClone.Remove(el);
-                                var delObj = foundObjectsInScene.Find((delEl) => delEl.GetComponent<POIObjectTextDisplay>().name == el.name);
+                                var delObj = foundObjectsInScene.Find((delEl) => delEl.GetComponent<POIObjectTextDisplay>().title.name == el.name);
                                 if (delObj)
                                     Destroy(delObj.gameObject);
                             }
