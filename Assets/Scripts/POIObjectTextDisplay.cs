@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -16,7 +17,7 @@ public class POIObjectTextDisplay : MonoBehaviour
     {
         this.title.text = geoObject.name;
         this.description.text = geoObject.description;
-        this.distance.text = distance.ToString().Substring(0, 6) + " meters";
+        this.distance.text = Int16.Parse(distance.ToString()).ToString() + " meters";
         Debug.Log("initialized " + geoObject.name);
     }
 }
