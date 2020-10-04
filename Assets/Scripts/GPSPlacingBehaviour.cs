@@ -20,6 +20,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// </summary>
     public TextMeshProUGUI currentLocationLog;
 
+    /// <summary>
+    /// Variable defines max lenght of vector to POI from (0,0,0) in Unity units
+    /// </summary>
+    const int maxDistanceToPOIGeoobject = 15;
+
     private LocationData currentLocation = null;
 
     /// <summary>
@@ -38,6 +43,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         RunGPSTracking();
         webSockets = GetComponent<WebSocketsBehaviour>();
+
     }
 
     private void Update()
@@ -62,25 +68,56 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     void UpdateGeoObjectsPositions(float lat, float lng)
     {
-        GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
-
-        List<POIObjectTextDisplay> foundObjectsInScene = new List<POIObjectTextDisplay>(FindObjectsOfType<POIObjectTextDisplay>());
-        geoObjectsInScene.ForEach((GeoObject el) =>
+        try
         {
-            var searchObj = foundObjectsInScene.Find((foundEl) => foundEl.GetComponent<POIObjectTextDisplay>().name == el.name);
-            if (searchObj)
-            {
-                searchObj.transform.position = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
-                Debug.Log($"Update object position of {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
-                double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng);
-
-                searchObj.distance.text = distanceToObject.ToString() + " meters";
-
-                Debug.Log($"Updated Distance to {el.name} {distanceToObject}m");
-            }
-        });
+            UpdatePOIGeoobjects(lat, lng);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.ToString());
+        }
     }
 
+    void UpdatePOIGeoobjects(float lat, float lng)
+    {
+        try
+        {
+
+            GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
+
+            List<POIObjectTextDisplay> foundObjectsInScene = new List<POIObjectTextDisplay>(FindObjectsOfType<POIObjectTextDisplay>());
+            geoObjectsInScene.ForEach((GeoObject el) =>
+            {
+                var searchObj = foundObjectsInScene.Find((foundEl) => foundEl.GetComponent<POIObjectTextDisplay>().title.text == el.name);
+                if (searchObj)
+                {
+                    Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
+
+                    // if distance to POI greater then maxDistanceToPOIGeoobject units then normalize to maxDistanceToPOIGeoobject
+                    if (positionOfGeoObject.magnitude > maxDistanceToPOIGeoobject)
+                    {
+                        searchObj.transform.position = positionOfGeoObject.normalized * maxDistanceToPOIGeoobject;
+                    }
+                    else
+                    {
+                        searchObj.transform.position = positionOfGeoObject;
+                    }
+
+                    Debug.Log($"Update object position of {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
+                    double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng);
+
+
+                    searchObj.distance.text = distanceToObject.ToString().Substring(0,6) + " meters";
+
+                    Debug.Log($"Updated Distance to {el.name} {distanceToObject}m");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.ToString());
+        }
+    }
     async Task TestPlacingObjects()
     {
         LocationData lastKnownLocation = new LocationData(Input.location.lastData.latitude, Input.location.lastData.longitude);
@@ -158,7 +195,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
                                 if (el.type == "text")
                                 {
                                     GPSEncoder.SetLocalOrigin(new Vector2(lastKnownLocation.lat, lastKnownLocation.lng));
-                                    var objectPlace = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
+                                    Vector3 objectPlace = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
+
+                                    // if distance to POI greater then maxDistanceToPOIGeoobject units then normalize to maxDistanceToPOIGeoobject
+                                    if (objectPlace.magnitude > maxDistanceToPOIGeoobject)
+                                    {
+                                        objectPlace = objectPlace.normalized * maxDistanceToPOIGeoobject;
+                                    }
 
                                     GameObject newGameobject = Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
 
@@ -168,8 +211,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
                                     Debug.Log($"Distance to {el.name} {distanceToObject}m");
 
-                                // init content of geoobject(point of interest)
-                                newGameobject.GetComponent<POIObjectTextDisplay>().Initialize(el, distanceToObject);
+
+                                    // init content of geoobject(point of interest)
+                                    newGameobject.GetComponent<POIObjectTextDisplay>().Initialize(el, distanceToObject);
                                     Debug.Log($"Placed object {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
                                 }
 
