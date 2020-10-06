@@ -26,6 +26,7 @@ public class ResponseFromServerLocationData
 [Serializable]
 public class GeoObject
 {
+    public string id;
     public string name;
     public string type;
     public string description;

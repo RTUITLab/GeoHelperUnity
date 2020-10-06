@@ -13,8 +13,16 @@ public class POIObjectTextDisplay : MonoBehaviour
     public TextMeshProUGUI description;
     public TextMeshProUGUI distance;
 
+    private string id;
+
+    public string getId()
+    {
+        return id;
+    }
+
     public void Initialize(GeoObject geoObject, double distance)
     {
+        this.id = geoObject.id;
         this.title.text = geoObject.name;
         this.description.text = geoObject.description;
         this.distance.text = Convert.ToUInt32(distance).ToString() + " meters";

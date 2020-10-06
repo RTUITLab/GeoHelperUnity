@@ -38,6 +38,17 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private static List<GeoObject> geoObjectsInScene = new List<GeoObject>();
 
+
+    /// <summary>
+    ///     Current value of ping location timer.
+    /// </summary>
+    private float _currentTimer;
+
+    /// <summary>
+    ///     Frequency at which we check our device location (to save battery).
+    /// </summary>
+    private const float LOCATION_PING = 10f; // 10 seconds
+
     private void Start()
     {
 
@@ -54,6 +65,20 @@ public class GPSPlacingBehaviour : MonoBehaviour
         {
             el.transform.LookAt(Camera.main.transform);
         });
+
+        _currentTimer += Time.deltaTime;
+        if (Input.location.status == LocationServiceStatus.Running &&
+            _currentTimer > LOCATION_PING)
+        {
+            LocationInfo locInfo = Input.location.lastData;
+            Vector3 locInfoPos = GPSEncoder.GPSToUCS(new Vector2(locInfo.latitude, locInfo.longitude));
+            float dist = Vector3.Distance(locInfoPos, Vector3.zero);
+            if (dist > 10f)
+            {
+                UpdateGeoObjectsPositions(locInfo.latitude, locInfo.longitude);
+            }
+            _currentTimer = 0f;
+        }
     }
 
     private async void LateUpdate()
@@ -84,11 +109,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
         {
 
             GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
+            GameObject.FindWithTag("ARSessionOrigin").transform.position = GPSEncoder.GPSToUCS(new Vector2(lat, lng));
 
             List<POIObjectTextDisplay> foundObjectsInScene = new List<POIObjectTextDisplay>(FindObjectsOfType<POIObjectTextDisplay>());
             geoObjectsInScene.ForEach((GeoObject el) =>
             {
-                var searchObj = foundObjectsInScene.Find((foundEl) => foundEl.GetComponent<POIObjectTextDisplay>().title.text == el.name);
+                var searchObj = foundObjectsInScene.Find((foundEl) => foundEl.GetComponent<POIObjectTextDisplay>().getId() == el.id);
                 if (searchObj)
                 {
                     Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(el.position.lat, el.position.lng);
@@ -106,7 +132,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     Debug.Log($"Update object position of {el.name} at location lat: {el.position.lat}, lng: {el.position.lng}");
                     double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, el.position.lat, el.position.lng);
 
-                    searchObj.distance.text =  Convert.ToUInt32(distanceToObject).ToString() + " meters";
+                    searchObj.distance.text = Convert.ToUInt32(distanceToObject).ToString() + " meters";
 
                     Debug.Log($"Updated Distance to {el.name} {distanceToObject}m");
                 }
@@ -161,10 +187,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         // delete objects from scene, which not found in pack of geoobjects from server
                         geoObjectsInScene.ForEach((GeoObject el) =>
                         {
-                            if (!packGeoObjectsFromServer.Any(g => g.name == el.name))
+                            if (!packGeoObjectsFromServer.Any(g => g.id == el.id))
                             {
                                 geoObjectsInSceneClone.Remove(el);
-                                var delObj = foundObjectsInScene.Find((delEl) => delEl.GetComponent<POIObjectTextDisplay>().title.name == el.name);
+                                var delObj = foundObjectsInScene.Find((delEl) => delEl.GetComponent<POIObjectTextDisplay>().getId() == el.id);
                                 if (delObj)
                                     Destroy(delObj.gameObject);
                             }
@@ -174,7 +200,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         List<GeoObject> geoObjectsToAdd = new List<GeoObject>();
                         packGeoObjectsFromServer.ForEach((GeoObject el) =>
                         {
-                            if (!geoObjectsInScene.Any(g => g.name == el.name))
+                            if (!geoObjectsInScene.Any(g => g.id == el.id))
                             {
                                 geoObjectsToAdd.Add(el);
                                 geoObjectsInSceneClone.Add(el);
@@ -249,7 +275,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         }
 
         // Start service before querying location with accuracy 1 meter
-        Input.location.Start(1f);
+        Input.location.Start(0.5f);
         Debug.Log("Fetching Location..");
         // Wait until service initializes
         int maxWait = 20;
