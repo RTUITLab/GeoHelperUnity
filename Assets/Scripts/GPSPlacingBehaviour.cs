@@ -49,9 +49,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// </summary>
     private const float LOCATION_PING = 10f; // 10 seconds
 
+    public GameObject ToNorth;
+
     private void Start()
     {
-
+        //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
         RunGPSTracking();
         webSockets = GetComponent<WebSocketsBehaviour>();
 
@@ -87,9 +89,14 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         if (webSockets.GetWSConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
         {
+            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, 0, 0);
+            //ToNorth.transform.rotation = Quaternion.Euler(0, 0, 0);
             isSceneReadyToChange = false;
             await TestPlacingObjects();
             isSceneReadyToChange = true;
+            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+            ToNorth.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
         }
     }
 
@@ -97,7 +104,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         try
         {
+            //ToNorth.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+            
             UpdatePOIGeoobjects(lat, lng);
+            
         }
         catch (Exception ex)
         {
@@ -115,13 +126,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
                 GameObject.FindWithTag("ARSessionOrigin").transform.position = GPSEncoder.GPSToUCS(new Vector2(lat, lng));
 
-                if (Input.compass.enabled)
-                {
-                    GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
-                    //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
-                    Debug.Log($"{DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
-                    //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
-                }
+                // if (Input.compass.enabled)
+                // {
+                //     GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
+                //     //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
+                //     Debug.Log($"{DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
+                //     //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
+                // }
 
                 geoObjectsInScene.ForEach((GeoObject el) =>
                 {
@@ -230,13 +241,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         {
                             GPSEncoder.SetLocalOrigin(new Vector2(currentLocation.lat, currentLocation.lng));
                             GameObject.FindWithTag("ARSessionOrigin").transform.position = GPSEncoder.GPSToUCS(new Vector2(currentLocation.lat, currentLocation.lng));
-                            if (Input.compass.enabled)
-                            {
-                                GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
-                                //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
-                                Debug.Log($" {DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
-                                //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
-                            }
+                            // if (Input.compass.enabled)
+                            // {
+                            //     GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
+                            //     //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
+                            //     Debug.Log($" {DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
+                            //     //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
+                            // }
 
                             Debug.Log($"{ DateTime.Now.ToString("HH:mm:ss tt")}{ geoObjectsToAdd.Count.ToString()} geoObjectsToAdd");
                             geoObjectsToAdd.ForEach((GeoObject el) =>
@@ -255,7 +266,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                                     GameObject newGameobject = Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
 
                                     newGameobject.transform.LookAt(Camera.main.transform);
-
+                                    newGameobject.transform.SetParent(ToNorth.transform);
                                     double distanceToObject = DistanceBetween2GeoobjectsInM(currentLocation.lat, currentLocation.lng, el.position.lat, el.position.lng);
 
                                     Debug.Log($"{DateTime.Now.ToString("HH:mm:ss tt")} Distance to {el.name} {distanceToObject}m");
