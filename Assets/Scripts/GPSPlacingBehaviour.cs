@@ -38,11 +38,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private static List<GeoObject> geoObjectsInScene = new List<GeoObject>();
 
-
+    private int compasTimer = 0;
     /// <summary>
     ///     Current value of ping location timer.
     /// </summary>
-    private float _currentTimer;
+    private float _currentTimer = 0;
+
+    private float offsetFromTrue;
 
     /// <summary>
     ///     Frequency at which we check our device location (to save battery).
@@ -56,6 +58,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
         RunGPSTracking();
         webSockets = GetComponent<WebSocketsBehaviour>();
+        offsetFromTrue = Input.compass.trueHeading;
 
     }
 
@@ -68,7 +71,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
             el.transform.LookAt(Camera.main.transform);
         });
 
-        //_currentTimer += Time.deltaTime;
+        _currentTimer += Time.deltaTime;
+        if (_currentTimer > 10f)
+        {
+            LocationInfo locInfo = Input.location.lastData;
+            UpdateGeoObjectsPositions(locInfo.latitude, locInfo.longitude);
+            _currentTimer = 0;
+        }
         //if (Input.location.status == LocationServiceStatus.Running &&
         //    _currentTimer > LOCATION_PING)
         //{
@@ -87,6 +96,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async void LateUpdate()
     {
+        GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
         if (webSockets.GetWSConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
         {
             //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, 0, 0);
@@ -95,8 +105,18 @@ public class GPSPlacingBehaviour : MonoBehaviour
             await TestPlacingObjects();
             isSceneReadyToChange = true;
             //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
-            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
-            ToNorth.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+            GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+            //if (Input.compass.trueHeading>180)
+            //    ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+            //else
+            ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+            if (compasTimer == 0)
+            {
+                Debug.LogError(Input.compass.trueHeading);
+                compasTimer = 20;
+            }
+            else
+                compasTimer--;
         }
     }
 
@@ -106,9 +126,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
         {
             //ToNorth.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
             //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
-            
+            //ToNorth.transform.rotation = Quaternion.Euler(0, 0, 0);
             UpdatePOIGeoobjects(lat, lng);
-            
+            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+            //ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading-offsetFromTrue, 0);
+
         }
         catch (Exception ex)
         {
