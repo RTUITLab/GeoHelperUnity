@@ -100,18 +100,16 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async void LateUpdate()
     {
-        GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
         if (webSockets.GetWSConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
         {
-            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, 0, 0);
-            //ToNorth.transform.rotation = Quaternion.Euler(0, 0, 0);
             isSceneReadyToChange = false;
             await TestPlacingObjects();
             isSceneReadyToChange = true;
-            GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
-            //if (Input.compass.trueHeading>180)
-            //    ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
-            //else
+            if (firstIterFlag)
+            {
+                firstIterFlag = false;
+                GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+            }
             
             if (compasTimer == 0)
             {
@@ -127,16 +125,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         try
         {
-            //ToNorth.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
-            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
-            //ToNorth.transform.rotation = Quaternion.Euler(0, 0, 0);
             UpdatePOIGeoobjects(lat, lng);
-            Debug.LogError("ARSessionOrigin offset" + (-offsetFromTrue).ToString());
-            ///GameObject.FindWithTag("ARSessionOrigin").transform.eulerAngles += new Vector3(0.0f, -offsetFromTrue, 0.0f);
-            ToNorth.transform.eulerAngles += new Vector3(0.0f, Input.compass.trueHeading, 0.0f);
-            //ToNorth.transform.rotation = Quaternion.Euler(0, 0, 0);
-            //GameObject.FindWithTag("ARSessionOrigin").transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
-            //ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading-offsetFromTrue, 0);
 
         }
         catch (Exception ex)
