@@ -19,7 +19,7 @@ public class WebSocketsBehaviour : MonoBehaviour
     private static bool connectionFree = true;
 
 
-    private readonly string webSocketConnectionString = "wss://geo-helper.ga";
+    private readonly string webSocketConnectionString = "wss://geohelper.rtuitlab.dev/api/test";
 
     private async void Start()
     {
