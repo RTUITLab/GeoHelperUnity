@@ -50,5 +50,6 @@ crashlytics-build.properties
 build1/
 
 build2/
+Assets/Plugins/GitHub
 
 .DS_Store
