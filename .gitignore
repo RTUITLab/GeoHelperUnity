@@ -53,3 +53,5 @@ build2/
 Assets/Plugins/GitHub
 
 .DS_Store
+
+buildIOS/

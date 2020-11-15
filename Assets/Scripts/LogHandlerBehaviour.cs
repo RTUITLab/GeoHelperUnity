@@ -34,7 +34,10 @@ public class LogHandlerBehaviour : MonoBehaviour
     {
         //if (!Application.isEditor) //Do not display in editor ( or you can use the UNITY_EDITOR macro to also disable the rest)
         //{
-            myLog = GUI.TextArea(new Rect(10, 10, Screen.width - Screen.width/2, Screen.height - Screen.height/2), myLog);
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 25;
+        style.normal.textColor = Color.green;
+        myLog = GUI.TextArea(new Rect(10, 10, Screen.width - Screen.width/2, Screen.height - Screen.height/2), myLog, style);
         //}
     }
 }

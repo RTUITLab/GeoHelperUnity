@@ -191,7 +191,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         LocationData lastKnownLocation = new LocationData(Input.location.lastData.latitude, Input.location.lastData.longitude);
 
         currentLocationLog.text = $"Current location is lat: {lastKnownLocation.lat}, lng: {lastKnownLocation.lng} Compass: " +
-            $"{((int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}";
+            $"{((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}";
 
         // if current location changed then update positions of all geoobjects in scene
         if (DistanceBetween2GeoobjectsInM(lastKnownLocation.lat, lastKnownLocation.lng, currentLocation.lat, currentLocation.lng) > 20)
