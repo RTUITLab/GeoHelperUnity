@@ -66,6 +66,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private void Start()
     {
+        DetermineApplicationPlatform();
+        
         _arSessionOrigin = GameObject.FindWithTag("ARSessionOrigin");
         _mainCamera = Camera.main;
         
@@ -79,6 +81,22 @@ public class GPSPlacingBehaviour : MonoBehaviour
         _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
     }
 
+    /// <summary>
+    /// Set debug mode to different platforms
+    /// </summary>
+    private void DetermineApplicationPlatform()
+    {
+        #if UNITY_EDITOR
+            isDebug = true;
+
+        #elif UNITY_IOS
+            isDebug = false;
+
+        #else
+            isDebug = false;
+        #endif
+    }
+    
     private void Update()
     {
         // force geoobjects type "text" look at camera
@@ -126,7 +144,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
             
             if (compasTimer == 0)
             {
-                // Debug.LogError(GetCompassTrueHeading());
+                // Debug.Log(GetCompassTrueHeading());
                 compasTimer = 15;
             }
             else
