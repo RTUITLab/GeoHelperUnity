@@ -58,19 +58,25 @@ public class GPSPlacingBehaviour : MonoBehaviour
     private GameObject _arSessionOrigin = null;
 
     private Camera _mainCamera = null;
+    
+    [Header("Debug mode")]
+    [SerializeField] private bool isDebug = false;
+    [SerializeField] private float fakeCompassTrueHeading;
+    [SerializeField] private LocationData fakeCurrentLocationData = null;
 
     private void Start()
     {
         _arSessionOrigin = GameObject.FindWithTag("ARSessionOrigin");
         _mainCamera = Camera.main;
         
-        //_arSessionOrigin.transform.rotation = Quaternion.Euler(0, -Input.compass.trueHeading, 0);
+        //_arSessionOrigin.transform.rotation = Quaternion.Euler(0, -GetCompassTrueHeading(), 0);
         RunGpsTracking();
+        
         webSockets = GetComponent<WebSocketsBehaviour>();
-        offsetFromTrue = Input.compass.trueHeading;
-        ToNorth.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
-        Debug.LogError($"offsetFromTrue = {offsetFromTrue}");
-        _arSessionOrigin.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+        offsetFromTrue = GetCompassTrueHeading();
+        ToNorth.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
+        Debug.Log($"offsetFromTrue = {offsetFromTrue}");
+        _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
     }
 
     private void Update()
@@ -85,14 +91,14 @@ public class GPSPlacingBehaviour : MonoBehaviour
         _currentTimer += Time.deltaTime;
         if (_currentTimer > 6f)
         {
-            LocationInfo locInfo = Input.location.lastData;
-            UpdateGeoObjectsPositions(locInfo.latitude, locInfo.longitude);
+            LocationData locInfo = GetUserLocationData();
+            UpdateGeoObjectsPositions(locInfo.lat, locInfo.lng);
             _currentTimer = 0;
         }
         //if (Input.location.status == LocationServiceStatus.Running &&
         //    _currentTimer > LOCATION_PING)
         //{
-        //    LocationInfo locInfo = Input.location.lastData;
+        //    LocationData locInfo = GetUserLocationData();
         //    Vector3 locInfoPos = GPSEncoder.GPSToUCS(new Vector2(locInfo.latitude, locInfo.longitude));
         //    float dist = Vector3.Distance(locInfoPos, Vector3.zero);
         //    if (dist > 10f)
@@ -115,20 +121,20 @@ public class GPSPlacingBehaviour : MonoBehaviour
             if (firstIterFlag)
             {
                 firstIterFlag = false;
-                _arSessionOrigin.transform.rotation = Quaternion.Euler(0, Input.compass.trueHeading, 0);
+                _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
             }
             
             if (compasTimer == 0)
             {
-                Debug.LogError(Input.compass.trueHeading);
+                // Debug.LogError(GetCompassTrueHeading());
                 compasTimer = 15;
             }
             else
                 compasTimer--;
         }
     }
-    
-    void UpdateGeoObjectsPositions(float lat, float lng)
+
+    private void UpdateGeoObjectsPositions(float lat, float lng)
     {
         try
         {
@@ -154,7 +160,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 // if (Input.compass.enabled)
                 // {
                 //     _arSessionOrigin.transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
-                //     //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
+                //     //Debug.Log($"True heading {((int)GetCompassTrueHeading()).ToString() + "° " + DegreesToCardinalDetailed(GetCompassTrueHeading())}");
                 //     Debug.Log($"{DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
                 //     //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
                 // }
@@ -195,10 +201,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async Task TestPlacingObjects()
     {
-        LocationData lastKnownLocation = new LocationData(Input.location.lastData.latitude, Input.location.lastData.longitude);
+        LocationData lastKnownLocation = GetUserLocationData();
 
         currentLocationLog.text = $"Current location is lat: {lastKnownLocation.lat}, lng: {lastKnownLocation.lng} Compass: " +
-            $"{((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}";
+            $"{((int)GetCompassTrueHeading()).ToString() + "° " + DegreesToCardinalDetailed(GetCompassTrueHeading())}";
 
         // if current location changed then update positions of all geoobjects in scene
         if (DistanceBetween2GeoobjectsInM(lastKnownLocation.lat, lastKnownLocation.lng, currentLocation.lat, currentLocation.lng) > 20)
@@ -213,23 +219,23 @@ public class GPSPlacingBehaviour : MonoBehaviour
             // !IMPORTANT>DO NOT CHANGE FORM OF REQUEST STRING !!!
             // string for request objects to place to scene
             string reqString = "{ " + $"\"lat\": {currentLocation.lat}, \"lng\": {currentLocation.lng}" + "}";
-
+            
             string responseData = await webSockets.ReceiveObjectsFromServer(reqString);
-
+            
             if (responseData != "")
             {
-                //Debug.Log($"Got response: {responseData}");
+                // Debug.Log($"Got response: {responseData}");
 
                 // json response from server for user location request
                 ResponseFromServerLocationData response = JsonUtility.FromJson<ResponseFromServerLocationData>(responseData);
-                //Debug.Log(response);
+                // Debug.Log(response);
 
                 if (response != null && response.success)
                 {
                     if (response.data.Count > 0)
                     {
-
-                        List<GeoObject> packGeoObjectsFromServer = new List<GeoObject>(response.data);
+                        
+                        List<GeoObject> packGeoObjectsFromServer = response.data;
 
                         List<GeoObject> geoObjectsInSceneClone = new List<GeoObject>(geoObjectsInScene);
 
@@ -269,7 +275,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                             // if (Input.compass.enabled)
                             // {
                             //     _arSessionOrigin.transform.rotation = Quaternion.Euler(0, -Input.compass.magneticHeading, 0);
-                            //     //Debug.Log($"True heading {((int)Input.compass.trueHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.trueHeading)}");
+                            //     //Debug.Log($"True heading {((int)GetCompassTrueHeading()).ToString() + "° " + DegreesToCardinalDetailed(GetCompassTrueHeading())}");
                             //     Debug.Log($" {DateTime.Now.ToString("HH:mm:ss tt")} Updated Magnetic heading {(-(int)Input.compass.magneticHeading).ToString() + "° " + DegreesToCardinalDetailed(Input.compass.magneticHeading)}");
                             //     //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
                             // }
@@ -309,7 +315,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     }
                     else
                     {
-                        //Debug.Log("Objects not found in this location");
+                        Debug.Log("Objects not found in this location");
                     }
                 }
             }
@@ -325,6 +331,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private void RunGpsTracking()
     {
+        if (isDebug)
+        {
+            currentLocation = GetUserLocationData();
+            gpsLocationInitialized = true;
+            return;
+        }
+
         if (!gpsLocationInitialized)
         {
             StartCoroutine(FetchLocationData());
@@ -332,6 +345,20 @@ public class GPSPlacingBehaviour : MonoBehaviour
         }
     }
 
+    private float GetCompassTrueHeading()
+    {
+        if (!isDebug)
+            return Input.compass.trueHeading;
+        return fakeCompassTrueHeading;
+    }
+
+    private LocationData GetUserLocationData()
+    {
+        if (!isDebug)
+            return new LocationData(Input.location.lastData.latitude, Input.location.lastData.longitude);
+        return fakeCurrentLocationData;
+    }
+    
     private IEnumerator FetchLocationData()
     {
         // First, check if user has location service enabled
@@ -375,11 +402,16 @@ public class GPSPlacingBehaviour : MonoBehaviour
         }
 
     }
+    
+    
 
     private void OnDisable()
     {
-        Input.location.Stop();
-        Debug.Log($"{DateTime.Now:HH:mm:ss tt} Location tracking stopped");
+        if (!isDebug)
+        {
+            Input.location.Stop();
+            Debug.Log($"{DateTime.Now:HH:mm:ss tt} Location tracking stopped");
+        }
     }
 
     private double DistanceBetween2GeoobjectsInM(double lat1, double long1, double lat2, double long2)

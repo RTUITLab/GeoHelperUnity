@@ -4,16 +4,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class LocationData
+public class LocationData 
 {
-    public LocationData(float latitude, float longitude)
+    public LocationData(float lat, float lng)
     {
-        lat = latitude;
-        lng = longitude;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public float lat;
     public float lng;
+
+    public override string ToString()
+    {
+        return base.ToString() + $" lat: {lat}, long: {lng}";
+    }
 }
 
 [Serializable]
@@ -31,4 +36,9 @@ public class GeoObject
     public string type;
     public string description;
     public LocationData position;
+
+    public override string ToString()
+    {
+        return base.ToString() + $" id: {id}, name: {name}, type: {type}, description: {description}, position: {position.ToString()}";
+    }
 }

@@ -600,6 +600,11 @@ MonoBehaviour:
     type: 3}
   currentLocationLog: {fileID: 1938677946}
   ToNorth: {fileID: 223974226}
+  isDebug: 1
+  fakeCompassTrueHeading: 0
+  fakeCurrentLocationData:
+    latitude: 0
+    longitude: 0
 --- !u!114 &1571473010
 MonoBehaviour:
   m_ObjectHideFlags: 0
