@@ -38,7 +38,6 @@ GeoHelper (Система для отображения AR-слоя мира)
 * Китанин С.С.
 ---
 # Site
-* https://geohelper.rtuitlab.dev/
 ---
 # SourceCode
 | name                                          | link                                          |
