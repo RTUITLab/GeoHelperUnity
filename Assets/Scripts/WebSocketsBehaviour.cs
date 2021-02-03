@@ -30,7 +30,7 @@ public class WebSocketsBehaviour : MonoBehaviour
 
     private async void Update()
     {
-        if (_client.State != WebSocketState.Open)
+        if (_client != null && _client.State != WebSocketState.Open)
         {
             await TryToConnectToServer();
         }
