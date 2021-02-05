@@ -9,6 +9,5 @@ namespace ServerModels
         string name { get; set; }
         string type { get; set; }
         LocationDataModel position { get; set; }
-        // string ToString();
     }
 }

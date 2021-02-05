@@ -2,19 +2,14 @@ using System;
 
 namespace ServerModels
 {
-    [Serializable]
-    public class GeoAudioObjectModel : IGeoObjectModel
+    // [Serializable]
+    public class GeoAudioObjectModel : GeoObjectModel
     {
-        public string url;
+        public string url { get; set; }
     
         public override string ToString()
         {
-            return $"{typeof(GeoAudioObjectModel)} id: {id}, name: {name}, type: {type}, position: {position.ToString()}, url: {url}";
+            return $"{nameof(GeoAudioObjectModel)} id: {id}, name: {name}, type: {type}, position: {position.ToString()}, url: {url}";
         }
-
-        public string id { get; set; }
-        public string name { get; set; }
-        public string type { get; set; }
-        public LocationDataModel position { get; set; }
     }
 }

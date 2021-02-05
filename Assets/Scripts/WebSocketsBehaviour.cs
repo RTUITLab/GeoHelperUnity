@@ -36,7 +36,7 @@ public class WebSocketsBehaviour : MonoBehaviour
         }
     }
 
-    public string GetWSConnectionState()
+    public static string GetWsConnectionState()
     {
         return _client.State.ToString();
     }

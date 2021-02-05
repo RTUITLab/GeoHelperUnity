@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine.XR.ARFoundation;
 using System.Linq;
+using Newtonsoft.Json;
 using ServerModels;
 using TMPro;
 using UnityEditorInternal;
@@ -27,7 +28,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// <summary>
     /// Variable defines max lenght of vector to POI from (0,0,0) in Unity units
     /// </summary>
-    const int maxDistanceToPOIGeoobject = 15;
+    const int maxDistanceToPOIGeoobject = 20;
+    
+    /// <summary>
+    /// Accuracy used for checking of changed position of object
+    /// </summary>
+    private const int accuracyOfPlacingObjectToSceneInM = 9;
 
     private LocationDataModel currentLocation = null;
 
@@ -137,7 +143,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async void LateUpdate()
     {
-        if (webSockets.GetWSConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
+        if (WebSocketsBehaviour.GetWsConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
         {
             isSceneReadyToChange = false;
             await TestPlacingObjects();
@@ -179,7 +185,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 string geoObjectId = geoObjectPair.Key;
                 GeoObject geoObject = geoObjectPair.Value.GetComponent<GeoObject>();
 
-                Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(geoObject.locationData.lat, geoObject.locationData.lng);
+                Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
 
                 if (geoObject is GeoPoiTextObject geoPoiTextObject)
                 {
@@ -188,13 +194,24 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     {
                         geoPoiTextObject.transform.position = positionOfGeoObject.normalized * maxDistanceToPOIGeoobject;
                     }
-                    else
+                    else if (Vector3
+                        .Distance(positionOfGeoObject, 
+                            geoPoiTextObject.transform.position) > accuracyOfPlacingObjectToSceneInM)
                     {
                         geoPoiTextObject.transform.position = positionOfGeoObject;
                     }
+                    else
+                    {
+                        // TODO TEST: Checking influence of this repositioning of object
+                        // geoPoiTextObject.transform.position = positionOfGeoObject;
+                        return;
+                    }
 
-                    Debug.Log($" {DateTime.Now:HH:mm:ss tt} Update object position of {geoObject.name} at location lat: {geoObject.locationData.lat}, lng: {geoObject.locationData.lng}");
-                    double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, geoObject.locationData.lat, geoObject.locationData.lng);
+                    Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of {geoObject.name}" +
+                              $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}");
+                    
+                    double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng, 
+                        geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
 
                     geoPoiTextObject.distance.text = Convert.ToUInt32(distanceToObject).ToString() + " meters";
 
@@ -245,42 +262,47 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         // Debug.Log(responseData);
         
-        if (responseData == "")
+        if (responseData == "" || responseData.StartsWith("{\"success\":true,\"message\":\"Connection established\"}"))
             return;
+        
 
-        Debug.Log($"Got response: {responseData}");
+        // Debug.Log($"Got response: {responseData}");
 
         // json response from server for user location request
-        ResponseFromServerLocationDataModel response = JsonUtility.FromJson<ResponseFromServerLocationDataModel>(responseData);
-        Debug.Log(response);
+        ResponseFromServerLocationDataModel response = JsonConvert.DeserializeObject<ResponseFromServerLocationDataModel>(responseData);
 
         if (response == null || !response.success)
         {
             Debug.Log("Failed to load object from server");
             return;
         }
+        
+        List<IGeoObjectModel> packGeoObjectsFromServer = new List<IGeoObjectModel>();
 
-        if (response?.geo3dObjectModels?.Count == 0 
-            && response?.geoAudioObjectModels?.Count == 0 
-            && response?.poiObjectModels?.Count == 0)
+        if (response.geoAudioObjectModels?.Any() == true)
+        {
+            packGeoObjectsFromServer.AddRange(response.geoAudioObjectModels);
+        }
+        if (response.poiObjectModels?.Any() == true)
+        {
+            packGeoObjectsFromServer.AddRange(response.poiObjectModels);
+        }
+        if (response.geo3dObjectModels?.Any() == true)
+        {
+            packGeoObjectsFromServer.AddRange(response.geo3dObjectModels);
+        }
+        
+        if (!(response.geoAudioObjectModels?.Any() == true 
+              || response.poiObjectModels?.Any() == true
+              || response.geo3dObjectModels?.Any() == true))
         {
             Debug.Log("Objects not found in this location");
+            await DeleteObjectsFromScene(packGeoObjectsFromServer);
             return;
         }
 
-        // IEnumerable<GeoObjectModel> packGeoObjectsFromServer = new <GeoObjectModel>();
-        if (response.geoAudioObjectModels?.Count != 0)
-        {
-            await DeleteObjectsFromScene(response.geoAudioObjectModels);
-        }
-        if (response.poiObjectModels?.Count != 0)
-        {
-            await DeleteObjectsFromScene(response.poiObjectModels);
-        }
-        if (response.geo3dObjectModels?.Count != 0)
-        {
-            await DeleteObjectsFromScene(response.geo3dObjectModels);
-        }
+
+        await DeleteObjectsFromScene(packGeoObjectsFromServer);
 
         
         GPSEncoder.SetLocalOrigin(new Vector2(currentLocation.lat, currentLocation.lng));
@@ -295,91 +317,93 @@ public class GPSPlacingBehaviour : MonoBehaviour
         //     //Debug.Log($"Raw vector {Input.compass.rawVector.ToString()}");
         // }
         
-        // determine geoObjects, which must be added to scene
-        if (response.geoAudioObjectModels?.Count != 0)
-        {
-            await AddNewObjectToScene(response.geoAudioObjectModels);
-        }
-        if (response.poiObjectModels?.Count != 0)
-        {
-            await AddNewObjectToScene(response.poiObjectModels);
-        }
-        if (response.geo3dObjectModels?.Count != 0)
-        {
-            await AddNewObjectToScene(response.geo3dObjectModels);
-        }
+        
+        // 
+
+        await AddNewObjectsToScene(packGeoObjectsFromServer);
 
     }
 
-    private async Task DeleteObjectsFromScene(IEnumerable<IGeoObjectModel> geoObjects)
+    
+    /// <summary>
+    /// Delete objects from scene, which not found in pack of geoObjects from server
+    /// </summary>
+    /// <param name="geoObjects"></param>
+    /// <returns></returns>
+    private static async Task DeleteObjectsFromScene(IEnumerable<IGeoObjectModel> geoObjects)
     {
-        if (geoObjects != null || geoObjects.Count() != 0)
-            return;
+
+        List<IGeoObjectModel> geoObjectModels = geoObjects.ToList();
+
+        List<string> deleteObjectsIds = geoObjectsInScene.Keys
+            .Where(objectId => geoObjectModels.All(geo => geo.id != objectId))
+            .ToList();
         
-        IEnumerable<string> deleteObjectIds = geoObjectsInScene.Keys
-            .Where(objectId => geoObjects.All(geo => geo.id != objectId));
-        
-        // delete objects from scene, which not found in pack of geoObjects from server
-        foreach (string geoObjectId in deleteObjectIds)
+        foreach (string geoObjectId in deleteObjectsIds)
         {
             Object delObj = geoObjectsInScene[geoObjectId];
             
-            if (delObj)
-                Destroy(delObj);
+            Destroy(delObj);
+
+            geoObjectsInScene.Remove(geoObjectId);
+
         }
     }
 
-    private async Task AddNewObjectToScene(IEnumerable<IGeoObjectModel> geoObjects)
+    
+    /// <summary>
+    /// Determine and add geoObjects, which must be added to scene
+    /// </summary>
+    /// <param name="geoObjects"></param>
+    /// <returns></returns>
+    private async Task AddNewObjectsToScene(IEnumerable<IGeoObjectModel> geoObjects)
     {
-        Debug.Log(geoObjects.ToString());
-        
+
         foreach (IGeoObjectModel geoObjectModel in geoObjects)
         {
-            Debug.Log(geoObjectModel.name);
-            if (!geoObjectsInScene.ContainsKey(geoObjectModel.id))
+            if (geoObjectsInScene.ContainsKey(geoObjectModel.id)) 
+                continue;
+            // adding geoObjects of type "text" to scene and init content of geoObject(point of interest)
+            if (geoObjectModel is GeoPoiObjectModel geoPoiObjectModel)
             {
-                // adding geoObjects of type "text" to scene and init content of geoObject(point of interest)
-                if (geoObjectModel is GeoPoiObjectModel geoPoiObjectModel)
+                Vector3 objectPlace =
+                    GPSEncoder.GPSToUCS(geoPoiObjectModel.position.lat, geoPoiObjectModel.position.lng);
+
+                // if distance to POI greater then maxDistanceToPOIGeoObject units then normalize to maxDistanceToPOIGeoObject
+                if (objectPlace.magnitude > maxDistanceToPOIGeoobject)
                 {
-                    Vector3 objectPlace =
-                        GPSEncoder.GPSToUCS(geoPoiObjectModel.position.lat, geoPoiObjectModel.position.lng);
-
-                    // if distance to POI greater then maxDistanceToPOIGeoObject units then normalize to maxDistanceToPOIGeoObject
-                    if (objectPlace.magnitude > maxDistanceToPOIGeoobject)
-                    {
-                        objectPlace = objectPlace.normalized * maxDistanceToPOIGeoobject;
-                    }
-
-                    GameObject newGameObject =
-                        Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
-
-                    newGameObject.transform.LookAt(_mainCamera.transform);
-                    newGameObject.transform.SetParent(ToNorth.transform);
-                    newGameObject.tag = nameof(IGeoObjectModel);
-                    double distanceToObject = DistanceBetween2GeoobjectsInM(currentLocation.lat,
-                        currentLocation.lng, geoPoiObjectModel.position.lat, geoPoiObjectModel.position.lng);
-
-                    Debug.Log($"{DateTime.Now:HH:mm:ss tt} Distance to {geoPoiObjectModel.name} {distanceToObject}m");
-
-
-                    // init content of geoObject(point of interest)
-                    newGameObject.AddComponent<GeoPoiTextObject>().Initialize(geoPoiObjectModel, distanceToObject);
-                    Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {geoPoiObjectModel.name} " +
-                              $"at location lat: {geoPoiObjectModel.position.lat}, lng: {geoPoiObjectModel.position.lng}");
-
-                    // add to dict of initedGeoObjects
-                    geoObjectsInScene.Add(geoObjectModel.id, newGameObject);
-
+                    objectPlace = objectPlace.normalized * maxDistanceToPOIGeoobject;
                 }
-                else if (geoObjectModel is GeoAudioObjectModel geoAudioObjectModel)
-                {
-                    // TODO: Add adding audio object
 
-                }
-                else if (geoObjectModel is Geo3dObjectModel geo3dObjectModel)
-                {
-                    // TODO: Add adding 3d object
-                }
+                GameObject newGameObject =
+                    Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
+
+                newGameObject.transform.LookAt(_mainCamera.transform);
+                newGameObject.transform.SetParent(ToNorth.transform);
+                newGameObject.tag = nameof(GeoPoiTextObject);
+                double distanceToObject = DistanceBetween2GeoobjectsInM(currentLocation.lat,
+                    currentLocation.lng, geoPoiObjectModel.position.lat, geoPoiObjectModel.position.lng);
+
+                Debug.Log($"{DateTime.Now:HH:mm:ss tt} Distance to {geoPoiObjectModel.name} {distanceToObject}m");
+
+
+                // init content of geoObject(point of interest)
+                newGameObject.GetComponent<GeoPoiTextObject>().Initialize(geoPoiObjectModel, distanceToObject);
+                Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {geoPoiObjectModel.name} " +
+                          $"at location lat: {geoPoiObjectModel.position.lat}, lng: {geoPoiObjectModel.position.lng}");
+
+                // add to dict of initedGeoObjects
+                geoObjectsInScene.Add(geoObjectModel.id, newGameObject);
+
+            }
+            else if (geoObjectModel is GeoAudioObjectModel geoAudioObjectModel)
+            {
+                // TODO: Add adding audio object
+
+            }
+            else if (geoObjectModel is Geo3dObjectModel geo3dObjectModel)
+            {
+                // TODO: Add adding 3d object
             }
         }
     }

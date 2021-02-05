@@ -666,6 +666,7 @@ GameObject:
   - component: {fileID: 1923490612445768893}
   - component: {fileID: 2988799177859378760}
   - component: {fileID: 4866779109651618840}
+  - component: {fileID: 5084943510254460085}
   m_Layer: 5
   m_Name: POIObjectTextCanvas
   m_TagString: Untagged
@@ -753,6 +754,24 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &5084943510254460085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7729553051228982093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5076d741325a476baa9f821d58e7b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  locationData:
+    lat: 0
+    lng: 0
+  title: {fileID: 6535679806714028935}
+  description: {fileID: 1329506144246785880}
+  distance: {fileID: 3179236320051295323}
 --- !u!1 &8252375906636876798
 GameObject:
   m_ObjectHideFlags: 0

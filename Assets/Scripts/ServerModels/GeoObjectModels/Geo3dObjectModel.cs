@@ -2,19 +2,13 @@ using System;
 
 namespace ServerModels
 {
-    [Serializable]
-    public class Geo3dObjectModel : IGeoObjectModel
+    public class Geo3dObjectModel : GeoObjectModel
     {
-        public string url;
+        public string url { get; set; }
         
         public override string ToString()
         {
             return $"{nameof(Geo3dObjectModel)}  id: {id}, name: {name}, type: {type}, position: {position.ToString()}, url: {url}";
         }
-
-        public string id { get; set; }
-        public string name { get; set; }
-        public string type { get; set; }
-        public LocationDataModel position { get; set; }
     }
 }
