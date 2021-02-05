@@ -185,7 +185,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 string geoObjectId = geoObjectPair.Key;
                 GeoObject geoObject = geoObjectPair.Value.GetComponent<GeoObject>();
 
-                Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
+                Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(geoObject.gpsLocation.lat,
+                    geoObject.gpsLocation.lng);
 
                 if (geoObject is GeoPoiTextObject geoPoiTextObject)
                 {
@@ -194,10 +195,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     {
                         geoPoiTextObject.transform.position = positionOfGeoObject.normalized * maxDistanceToPOIGeoobject;
                     }
+                    
                     else if (Vector3
                         .Distance(positionOfGeoObject, 
                             geoPoiTextObject.transform.position) > accuracyOfPlacingObjectToSceneInM)
                     {
+                        // TODO TEST: Checking influence of this repositioning of object
                         geoPoiTextObject.transform.position = positionOfGeoObject;
                     }
                     else
@@ -244,7 +247,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
             $"{((int)GetCompassTrueHeading()).ToString() + "° " + DegreesToCardinalDetailed(GetCompassTrueHeading())}";
 
         // if current location changed then update positions of all geoObjects in scene
-        if (DistanceBetween2GeoobjectsInM(lastKnownLocation.lat, lastKnownLocation.lng, currentLocation.lat, currentLocation.lng) > 20)
+        if (DistanceBetween2GeoobjectsInM(lastKnownLocation.lat,
+            lastKnownLocation.lng, currentLocation.lat, currentLocation.lng) > 20)
         {
             currentLocation = lastKnownLocation;
             Debug.Log($" {DateTime.Now:HH: mm:ss tt} UpdateGeoObjectsPositions");

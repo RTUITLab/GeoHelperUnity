@@ -37,26 +37,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="840732f3-796d-4da1-b406-5517b613c48a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/indexLayout.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/POIObjectTextCanvas.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/POIObjectTextCanvas.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/Geo3dObjectModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/Geo3dObjectModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoAudioObjectModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoAudioObjectModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoPoiObjectModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoPoiObjectModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/IGeoObjectModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/IGeoObjectModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ServerModels/ResponseFromServerLocationDataModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ServerModels/ResponseFromServerLocationDataModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoObject.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoPoiTextObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoPoiTextObject.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/WebSocketsBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/WebSocketsBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/.signature.p7s" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/AutoMapper.10.1.1.nupkg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/lib/net461/AutoMapper.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/lib/net461/AutoMapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/lib/netstandard2.0/AutoMapper.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/AutoMapper.10.1.1/lib/netstandard2.0/AutoMapper.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages.config" beforeDir="false" afterPath="$PROJECT_DIR$/packages.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +136,7 @@
       <updated>1612105678583</updated>
       <workItem from="1612105698878" duration="9538000" />
       <workItem from="1612445723492" duration="13473000" />
-      <workItem from="1612489697101" duration="14504000" />
+      <workItem from="1612489697101" duration="16238000" />
     </task>
     <servers />
   </component>
