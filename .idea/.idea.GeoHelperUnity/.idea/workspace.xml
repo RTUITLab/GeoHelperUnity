@@ -37,8 +37,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="840732f3-796d-4da1-b406-5517b613c48a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/contentModel.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/indexLayout.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/POIObjectTextCanvas.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/POIObjectTextCanvas.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/LocationData.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/LocationData.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/POIObjectTextDisplay.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/POIObjectTextDisplay.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/WebSocketsBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/WebSocketsBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages.config" beforeDir="false" afterPath="$PROJECT_DIR$/packages.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,12 +63,32 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/Assets/Scripts/WebSocketsBehaviour.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/POIObjectTextDisplay.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/LocationData.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/LocationDataModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/POIObjectTextDisplay.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/PoiObjectTextDisplay.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/PoiTextObject.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/LocationDataModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/Geo3dObject.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoAudioObject.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoPoiTextObject.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/UnityModels/GeoObject.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoObjectModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/IGeoObjectModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoPoiObjectModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/GeoAudioObjectModel.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/GeoObjectModels/Geo3dObjectModel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ServerModels/ResponseFromServerLocationDataModel.cs" />
       </list>
     </option>
   </component>
   <component name="ProjectId" id="1nq7GbwFpOVTi0ZJLNorZ0CI5EO" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -65,6 +96,8 @@
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.3496708" />
+    <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.29992685" />
     <property name="Discover.Launch.Via.Unity" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -81,10 +114,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="63152">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="63152" />
       <option name="selectedOptions">
         <set />
       </option>
@@ -100,6 +133,7 @@
       <option name="presentableId" value="Default" />
       <updated>1612105678583</updated>
       <workItem from="1612105698878" duration="9538000" />
+      <workItem from="1612445723492" duration="13473000" />
     </task>
     <servers />
   </component>
@@ -118,18 +152,115 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="414" y="93" key="#com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog" timestamp="1612483714284">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state x="414" y="93" key="#com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog/0.25.1440.801@0.25.1440.801" timestamp="1612483714284" />
+    <state width="1398" height="278" key="GridCell.Tab.0.bottom" timestamp="1612477888179">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.0.bottom/0.25.1440.801@0.25.1440.801" timestamp="1612477888179" />
+    <state width="1398" height="278" key="GridCell.Tab.0.center" timestamp="1612477888175">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.0.center/0.25.1440.801@0.25.1440.801" timestamp="1612477888175" />
+    <state width="1398" height="278" key="GridCell.Tab.0.left" timestamp="1612477888172">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.0.left/0.25.1440.801@0.25.1440.801" timestamp="1612477888172" />
+    <state width="1398" height="278" key="GridCell.Tab.0.right" timestamp="1612477888176">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.0.right/0.25.1440.801@0.25.1440.801" timestamp="1612477888176" />
+    <state width="1398" height="278" key="GridCell.Tab.1.bottom" timestamp="1612477888181">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.1.bottom/0.25.1440.801@0.25.1440.801" timestamp="1612477888181" />
+    <state width="1398" height="278" key="GridCell.Tab.1.center" timestamp="1612477888180">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.1.center/0.25.1440.801@0.25.1440.801" timestamp="1612477888180" />
+    <state width="1398" height="278" key="GridCell.Tab.1.left" timestamp="1612477888180">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.1.left/0.25.1440.801@0.25.1440.801" timestamp="1612477888180" />
+    <state width="1398" height="278" key="GridCell.Tab.1.right" timestamp="1612477888181">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.1.right/0.25.1440.801@0.25.1440.801" timestamp="1612477888181" />
+    <state width="1398" height="278" key="GridCell.Tab.2.bottom" timestamp="1612477888183">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.2.bottom/0.25.1440.801@0.25.1440.801" timestamp="1612477888183" />
+    <state width="1398" height="278" key="GridCell.Tab.2.center" timestamp="1612477888182">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.2.center/0.25.1440.801@0.25.1440.801" timestamp="1612477888182" />
+    <state width="1398" height="278" key="GridCell.Tab.2.left" timestamp="1612477888182">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.2.left/0.25.1440.801@0.25.1440.801" timestamp="1612477888182" />
+    <state width="1398" height="278" key="GridCell.Tab.2.right" timestamp="1612477888183">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.2.right/0.25.1440.801@0.25.1440.801" timestamp="1612477888183" />
+    <state width="1398" height="278" key="GridCell.Tab.3.bottom" timestamp="1612477888187">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.3.bottom/0.25.1440.801@0.25.1440.801" timestamp="1612477888187" />
+    <state width="1398" height="278" key="GridCell.Tab.3.center" timestamp="1612477888185">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.3.center/0.25.1440.801@0.25.1440.801" timestamp="1612477888185" />
+    <state width="1398" height="278" key="GridCell.Tab.3.left" timestamp="1612477888184">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.3.left/0.25.1440.801@0.25.1440.801" timestamp="1612477888184" />
+    <state width="1398" height="278" key="GridCell.Tab.3.right" timestamp="1612477888186">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state width="1398" height="278" key="GridCell.Tab.3.right/0.25.1440.801@0.25.1440.801" timestamp="1612477888186" />
+    <state x="535" y="113" key="RiderGenerateDialog" timestamp="1612483476587">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state x="535" y="113" key="RiderGenerateDialog/0.25.1440.801@0.25.1440.801" timestamp="1612483476587" />
     <state x="229" y="60" key="SettingsEditor" timestamp="1612108756794">
       <screen x="0" y="25" width="1440" height="799" />
     </state>
     <state x="229" y="60" key="SettingsEditor/0.25.1440.799@0.25.1440.799" timestamp="1612108756794" />
-    <state x="100" y="125" width="1240" height="599" key="VCS.FileHistoryDialog" timestamp="1612109060795">
-      <screen x="0" y="25" width="1440" height="799" />
+    <state x="100" y="125" width="1240" height="601" key="VCS.FileHistoryDialog" timestamp="1612469255925">
+      <screen x="0" y="25" width="1440" height="801" />
     </state>
     <state x="100" y="125" width="1240" height="599" key="VCS.FileHistoryDialog/0.25.1440.799@0.25.1440.799" timestamp="1612109060795" />
+    <state x="100" y="125" width="1240" height="601" key="VCS.FileHistoryDialog/0.25.1440.801@0.25.1440.801" timestamp="1612469255925" />
+    <state x="383" y="147" width="672" height="678" key="search.everywhere.popup" timestamp="1612473428871">
+      <screen x="0" y="25" width="1440" height="801" />
+    </state>
+    <state x="383" y="147" width="672" height="678" key="search.everywhere.popup/0.25.1440.801@0.25.1440.801" timestamp="1612473428871" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs</url>
+          <line>254</line>
+          <properties documentPath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" initialLine="254">
+            <startOffsets>
+              <option value="9322" />
+            </startOffsets>
+            <endOffsets>
+              <option value="9342" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

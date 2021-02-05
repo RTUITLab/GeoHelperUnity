@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - ARSessionOrigin
+  - GeoAudioObject
+  - Geo3dObject
+  - GeoPoiTextObject
   layers:
   - Default
   - TransparentFX

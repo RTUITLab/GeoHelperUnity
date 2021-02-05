@@ -602,9 +602,9 @@ MonoBehaviour:
   ToNorth: {fileID: 223974226}
   isDebug: 0
   fakeCompassTrueHeading: 0
-  fakeCurrentLocationData:
-    lat: 55.553688
-    lng: 37.46782
+  fakeCurrentLocationDataModel:
+    lat: 55.68662
+    lng: 37.449337
 --- !u!114 &1571473010
 MonoBehaviour:
   m_ObjectHideFlags: 0

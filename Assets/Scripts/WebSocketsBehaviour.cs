@@ -95,7 +95,7 @@ public class WebSocketsBehaviour : MonoBehaviour
                 await SendSelfLocationToServer(jsonRequestString);
 
                 byte[] buffer = new byte[65536];
-                var segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
 
                 // lock semaphore
                 connectionFree = false;

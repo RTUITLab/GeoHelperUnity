@@ -1,0 +1,20 @@
+using System;
+
+namespace ServerModels
+{
+    [Serializable]
+    public class Geo3dObjectModel : IGeoObjectModel
+    {
+        public string url;
+        
+        public override string ToString()
+        {
+            return $"{nameof(Geo3dObjectModel)}  id: {id}, name: {name}, type: {type}, position: {position.ToString()}, url: {url}";
+        }
+
+        public string id { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public LocationDataModel position { get; set; }
+    }
+}

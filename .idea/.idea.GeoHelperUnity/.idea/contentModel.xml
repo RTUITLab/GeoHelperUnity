@@ -20,9 +20,23 @@
         <e p="Scripts" t="Include">
           <e p="CompassCameraBehaviour.cs" t="Include" />
           <e p="GPSPlacingBehaviour.cs" t="Include" />
-          <e p="LocationData.cs" t="Include" />
           <e p="LogHandlerBehaviour.cs" t="Include" />
-          <e p="POIObjectTextDisplay.cs" t="Include" />
+          <e p="ServerModels" t="Include">
+            <e p="GeoObjectModels" t="Include">
+              <e p="Geo3dObjectModel.cs" t="Include" />
+              <e p="GeoAudioObjectModel.cs" t="Include" />
+              <e p="GeoPoiObjectModel.cs" t="Include" />
+              <e p="IGeoObjectModel.cs" t="Include" />
+            </e>
+            <e p="LocationDataModel.cs" t="Include" />
+            <e p="ResponseFromServerLocationDataModel.cs" t="Include" />
+          </e>
+          <e p="UnityModels" t="Include">
+            <e p="Geo3dObject.cs" t="Include" />
+            <e p="GeoAudioObject.cs" t="Include" />
+            <e p="GeoObject.cs" t="Include" />
+            <e p="GeoPoiTextObject.cs" t="Include" />
+          </e>
           <e p="WebSocketsBehaviour.cs" t="Include" />
         </e>
         <e p="TextMesh Pro" t="Include">
