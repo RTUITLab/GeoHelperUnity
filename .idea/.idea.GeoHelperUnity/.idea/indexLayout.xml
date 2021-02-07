@@ -24,6 +24,7 @@
       <Path>.git</Path>
       <Path>.idea</Path>
       <Path>Library</Path>
+      <Path>Temp</Path>
       <Path>build</Path>
       <Path>landing</Path>
       <Path>obj</Path>
