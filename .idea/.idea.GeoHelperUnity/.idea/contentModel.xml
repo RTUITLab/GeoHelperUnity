@@ -23,6 +23,7 @@
         <e p="Scripts" t="Include">
           <e p="CompassCameraBehaviour.cs" t="Include" />
           <e p="GPSPlacingBehaviour.cs" t="Include" />
+          <e p="KalmanLatLong.cs" t="Include" />
           <e p="LogHandlerBehaviour.cs" t="Include" />
           <e p="ServerModels" t="Include">
             <e p="GeoObjectModels" t="Include">
