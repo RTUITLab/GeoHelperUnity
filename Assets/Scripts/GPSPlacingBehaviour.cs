@@ -170,8 +170,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         try
         {
-            GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
-            _arSessionOrigin.transform.position = GPSEncoder.GPSToUCS(lat, lng);
+            // GPSEncoder.SetLocalOrigin(new Vector2(lat, lng));
+            // _arSessionOrigin.transform.position = GPSEncoder.GPSToUCS(lat, lng);
 
             // if (Input.compass.enabled)
             // {
@@ -215,9 +215,23 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     else if (diffInMBetweenUserAndGpsOfObject > maxDistanceToPOIGeoobject)
                     {
                         // TODO TEST: Checking influence of this repositioning of object
+
+                        var distanceBetweenUserAndMaxDistance = Vector3
+                            .Distance(geoPoiTextObject.transform.position,
+                                _mainCamera.transform.position);
+                        float addingDistanceBetweenUserAndMaxDistance;
+                        if (distanceBetweenUserAndMaxDistance < maxDistanceToPOIGeoobject)
+                        {
+                            addingDistanceBetweenUserAndMaxDistance =
+                                maxDistanceToPOIGeoobject - distanceBetweenUserAndMaxDistance;
+                        }
+                        else
+                        {
+                            addingDistanceBetweenUserAndMaxDistance = 0;
+                        }
                         
                         geoPoiTextObject.transform.position =
-                            positionOfGeoObject.normalized * maxDistanceToPOIGeoobject;
+                            positionOfGeoObject.normalized * (maxDistanceToPOIGeoobject + addingDistanceBetweenUserAndMaxDistance);
                     }
                     else
                     {
@@ -326,9 +340,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
         await DeleteObjectsFromScene(packGeoObjectsFromServer);
 
 
-        GPSEncoder.SetLocalOrigin(new Vector2(currentLocation.lat, currentLocation.lng));
-        _arSessionOrigin.transform.position =
-            GPSEncoder.GPSToUCS(currentLocation.lat, currentLocation.lng);
+        // GPSEncoder.SetLocalOrigin(new Vector2(currentLocation.lat, currentLocation.lng));
+        // _arSessionOrigin.transform.position =
+        //     GPSEncoder.GPSToUCS(currentLocation.lat, currentLocation.lng);
 
         // if (Input.compass.enabled)
         // {
