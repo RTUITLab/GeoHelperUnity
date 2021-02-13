@@ -346,15 +346,23 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         List<IGeoObjectModel> geoObjectModels = geoObjects.ToList();
 
-        List<string> deleteObjectsIds = geoObjectsInScene.Keys
-            .Where(objectId => geoObjectModels.All(geo => geo.id != objectId))
-            .ToList();
+        List<string> deleteObjectsIds = null;
+        if (geoObjectModels.Any() == true)
+        {
+            deleteObjectsIds = geoObjectsInScene.Keys
+                .Where(objectId => geoObjectModels.All(geo => geo.id != objectId))
+                .ToList();
+        }
+        else
+        {
+            deleteObjectsIds = geoObjectsInScene.Keys.ToList();
+        }
 
         foreach (string geoObjectId in deleteObjectsIds)
         {
-            Object delObj = geoObjectsInScene[geoObjectId];
+            GameObject delObj = geoObjectsInScene[geoObjectId];
 
-            Destroy(delObj);
+            Destroy(delObj.gameObject);
 
             geoObjectsInScene.Remove(geoObjectId);
         }
@@ -386,6 +394,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 {
                     objectPlace = objectPlace.normalized * maxDistanceToPOIGeoobject;
                 }
+                
 
                 GameObject newGameObject =
                     Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
