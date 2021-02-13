@@ -121,13 +121,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
             gameObj.transform.LookAt(_mainCamera.transform);
         }
 
-        _currentTimer += Time.deltaTime;
-        if (_currentTimer > 6f)
-        {
+        // _currentTimer += Time.deltaTime;
+        // if (_currentTimer > 1f)
+        // {
             LocationDataModel locInfo = GetUserLocationData();
             UpdateGeoObjectsPositions(locInfo.lat, locInfo.lng);
-            _currentTimer = 0;
-        }
+            // _currentTimer = 0;
+        // }
 
         //if (Input.location.status == LocationServiceStatus.Running &&
         //    _currentTimer > LOCATION_PING)
@@ -192,46 +192,29 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 if (geoObject is GeoPoiTextObject geoPoiTextObject)
                 {
                     // if distance to POI greater then maxDistanceToPOIGeoObject units then normalize to maxDistanceToPOIGeoObject
-                    // float diffInMBetweenUserAndGpsOfObject = Vector3.Distance(positionOfGeoObject, geoPoiTextObject.transform.position);
                     double diffInMBetweenUserAndGpsOfObject = DistanceBetween2GeoobjectsInM(lat, lng,
                         geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
                     float diffInMBetweenPrevObjV3LocAndNewV3LocOfObject = Vector3
                         .Distance(geoPoiTextObject.transform.position, positionOfGeoObject);
-                    
+
                     if (accuracyOfPlacingObjectToSceneInM <= diffInMBetweenUserAndGpsOfObject &&
                         diffInMBetweenUserAndGpsOfObject <= maxDistanceToPOIGeoobject &&
-                        accuracyOfPlacingObjectToSceneInM <= diffInMBetweenPrevObjV3LocAndNewV3LocOfObject )
+                        accuracyOfPlacingObjectToSceneInM <= diffInMBetweenPrevObjV3LocAndNewV3LocOfObject)
                     {
-                        geoPoiTextObject.transform.position = positionOfGeoObject;
-                        Debug.Log($"--Changed position with gps:\n" +
-                                  $" gps of obj {geoObject.gpsLocation.lat}, {geoObject.gpsLocation.lng}\n" +
-                                  $" gps of user {lat}, {lng}\n" +
-                                  $" diff by gps {diffInMBetweenUserAndGpsOfObject}\n" +
-                                  $" old to v3 loc {geoPoiTextObject.transform.position.ToString()}\n" +
-                                  $" new v3 loc {positionOfGeoObject.ToString()}\n" +
-                                  $"position diff in v3 {diffInMBetweenPrevObjV3LocAndNewV3LocOfObject}");
+                        geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
+                            positionOfGeoObject, 1f * Time.deltaTime);
                     }
 
                     else if (diffInMBetweenUserAndGpsOfObject > maxDistanceToPOIGeoobject)
                     {
                         // TODO TEST: Checking influence of this repositioning of object
 
-                        var distanceBetweenUserAndMaxDistance = Vector3
-                            .Distance(geoPoiTextObject.transform.position,
-                                _mainCamera.transform.position);
-                        float addingDistanceBetweenUserAndMaxDistance;
-                        if (distanceBetweenUserAndMaxDistance < maxDistanceToPOIGeoobject)
-                        {
-                            addingDistanceBetweenUserAndMaxDistance =
-                                maxDistanceToPOIGeoobject - distanceBetweenUserAndMaxDistance;
-                        }
-                        else
-                        {
-                            addingDistanceBetweenUserAndMaxDistance = 0;
-                        }
-                        
-                        geoPoiTextObject.transform.position =
-                            positionOfGeoObject.normalized * (maxDistanceToPOIGeoobject + addingDistanceBetweenUserAndMaxDistance);
+                        var newPosition = (positionOfGeoObject
+                                           - _mainCamera.transform.position).normalized * maxDistanceToPOIGeoobject
+                                          + _mainCamera.transform.position;
+
+                        geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
+                            newPosition, 1f * Time.deltaTime);
                     }
                     else
                     {
@@ -243,11 +226,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
 
                     geoPoiTextObject.distance.text = Convert.ToUInt32(distanceToObject).ToString() + " meters";
-
-                    Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
-                              $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
-                              $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
-                              $"\n Updated Distance to {distanceToObject}m");
                 }
                 else if (geoObject is GeoAudioObject geoAudioObject)
                 {
@@ -415,9 +393,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 newGameObject.transform.LookAt(_mainCamera.transform);
                 newGameObject.transform.SetParent(ToNorth.transform);
                 newGameObject.tag = nameof(GeoPoiTextObject);
-                
+
                 // init content of geoObject(point of interest)
-                newGameObject.GetComponent<GeoPoiTextObject>().Initialize(geoPoiObjectModel, diffInMBetweenUserAndGpsOfObject);
+                newGameObject.GetComponent<GeoPoiTextObject>()
+                    .Initialize(geoPoiObjectModel, diffInMBetweenUserAndGpsOfObject);
                 Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {geoPoiObjectModel.name} " +
                           $"at location lat: {geoPoiObjectModel.position.lat}, lng: {geoPoiObjectModel.position.lng}. " +
                           $"\n Updated Distance to {diffInMBetweenUserAndGpsOfObject}m");
