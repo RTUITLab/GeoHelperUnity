@@ -603,8 +603,8 @@ MonoBehaviour:
   isDebug: 0
   fakeCompassTrueHeading: 0
   fakeCurrentLocationDataModel:
-    lat: 55.669796
-    lng: 37.479355
+    lat: 55.55375
+    lng: 37.4669
 --- !u!114 &1571473010
 MonoBehaviour:
   m_ObjectHideFlags: 0

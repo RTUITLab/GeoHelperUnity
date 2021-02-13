@@ -78,7 +78,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     [SerializeField] private float fakeCompassTrueHeading;
     [SerializeField] private LocationDataModel fakeCurrentLocationDataModel = null;
 
-    private void Start()
+    private async Task Start()
     {
         DetermineApplicationPlatform();
 
@@ -88,7 +88,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         GPSEncoder.Init();
 
         //_arSessionOrigin.transform.rotation = Quaternion.Euler(0, -GetCompassTrueHeading(), 0);
-        RunGpsTracking();
+        await RunGpsTracking();
 
         webSockets = GetComponent<WebSocketsBehaviour>();
         offsetFromTrue = GetCompassTrueHeading();
@@ -121,13 +121,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
             gameObj.transform.LookAt(_mainCamera.transform);
         }
 
-        // _currentTimer += Time.deltaTime;
-        // if (_currentTimer > 1f)
-        // {
-            LocationDataModel locInfo = GetUserLocationData();
-            UpdateGeoObjectsPositions(locInfo.lat, locInfo.lng);
-            // _currentTimer = 0;
-        // }
+        if (!gpsLocationInitialized) 
+            return;
+        LocationDataModel locInfo = GetUserLocationData();
+        UpdateGeoObjectsPositions(locInfo.lat, locInfo.lng);
 
         //if (Input.location.status == LocationServiceStatus.Running &&
         //    _currentTimer > LOCATION_PING)
@@ -203,8 +200,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
                     {
                         geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
                             positionOfGeoObject, 1f * Time.deltaTime);
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
+                        //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
+                        //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.position}m");
                     }
-
                     else if (diffInMBetweenUserAndGpsOfObject > maxDistanceToPOIGeoobject)
                     {
                         // TODO TEST: Checking influence of this repositioning of object
@@ -215,6 +215,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
                         geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
                             newPosition, 1f * Time.deltaTime);
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
+                        //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
+                        //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.position}m");
                     }
                     else
                     {
@@ -246,6 +250,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async Task TestPlacingObjects()
     {
+        if (!gpsLocationInitialized)
+            return;
+
         LocationDataModel lastKnownLocation = GetUserLocationData();
 
         currentLocationLog.text =
@@ -392,9 +399,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
                 if (diffInMBetweenUserAndGpsOfObject > maxDistanceToPOIGeoobject)
                 {
-                    objectPlace = objectPlace.normalized * maxDistanceToPOIGeoobject;
+                    // TODO TEST: Checking influence of this repositioning of object
+
+                    objectPlace = (objectPlace
+                                   - _mainCamera.transform.position).normalized * maxDistanceToPOIGeoobject
+                                  + _mainCamera.transform.position;
                 }
-                
 
                 GameObject newGameObject =
                     Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
@@ -431,7 +441,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
         return caridnals[(int) Math.Round(((double) degrees * 10 % 3600) / 225)];
     }
 
-    private void RunGpsTracking()
+    private async Task RunGpsTracking()
     {
         if (isDebug)
         {

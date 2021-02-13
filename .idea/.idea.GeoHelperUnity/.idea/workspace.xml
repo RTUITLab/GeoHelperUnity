@@ -21,6 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="840732f3-796d-4da1-b406-5517b613c48a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GeoHelperUnity/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -133,7 +134,7 @@
       <workItem from="1612636909673" duration="4676000" />
       <workItem from="1612825500281" duration="22435000" />
       <workItem from="1612899922644" duration="1459000" />
-      <workItem from="1612975040652" duration="14836000" />
+      <workItem from="1612975040652" duration="16908000" />
     </task>
     <servers />
   </component>
@@ -162,12 +163,12 @@
       <screen x="0" y="25" width="1440" height="801" />
     </state>
     <state x="414" y="93" key="#com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog/0.25.1440.801@0.25.1440.801" timestamp="1612483714284" />
-    <state width="593" height="468" key="DebuggerActiveHint" timestamp="1613249193074">
+    <state width="593" height="468" key="DebuggerActiveHint" timestamp="1613249268122">
       <screen x="0" y="25" width="1440" height="804" />
     </state>
     <state width="448" height="464" key="DebuggerActiveHint/0.25.1440.799@0.25.1440.799" timestamp="1612534093142" />
     <state width="593" height="466" key="DebuggerActiveHint/0.25.1440.801@0.25.1440.801" timestamp="1613059148722" />
-    <state width="593" height="468" key="DebuggerActiveHint/0.25.1440.804@0.25.1440.804" timestamp="1613249193074" />
+    <state width="593" height="468" key="DebuggerActiveHint/0.25.1440.804@0.25.1440.804" timestamp="1613249268122" />
     <state width="1398" height="350" key="GridCell.Tab.0.bottom" timestamp="1613248932670">
       <screen x="0" y="25" width="1440" height="804" />
     </state>
@@ -295,23 +296,6 @@
     <state x="383" y="147" width="672" height="678" key="search.everywhere.popup/0.25.1440.801@0.25.1440.801" timestamp="1612473428871" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs</url>
-          <line>362</line>
-          <properties documentPath="$PROJECT_DIR$/Assets/Scripts/GPSPlacingBehaviour.cs" initialLine="362">
-            <startOffsets>
-              <option value="13457" />
-            </startOffsets>
-            <endOffsets>
-              <option value="13504" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="Frame#GPSPlacingBehaviour.UpdateGeoObjectsPositions" memberName="geoObjectPair" />
