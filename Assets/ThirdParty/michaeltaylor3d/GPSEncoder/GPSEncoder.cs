@@ -1,9 +1,47 @@
 //Copyright 2013 MichaelTaylor3D
 //www.michaeltaylor3d.com
 
+using Filter;
+using ServerModels;
 using UnityEngine;
 
-public sealed class GPSEncoder {
+public sealed class GPSEncoder
+{
+
+
+	// private static KalmanFilterVector2 _kalmanFilter;
+	private static KalmanLatLong _kalmanFilter;
+	private static bool _isKalmanGotFirstState = false;
+	public static void Init()
+	{
+		// _kalmanFilter = new KalmanFilterVector2();
+		_kalmanFilter = new KalmanLatLong(3);
+	}
+
+
+	public static Vector2 GetFilteredVector2(float lat, float lng, float accuracy, double TimeStamp_milliseconds)
+	{
+		if (_kalmanFilter == null)
+		{
+			Debug.LogError("Kalman filter not initialized");
+		}
+		
+		// Vector2 filteredLocation = _kalmanFilter.Update(currentLocation);
+		if (!_isKalmanGotFirstState)
+		{
+			_kalmanFilter.SetState((double) lat, (double) lng, accuracy, (long)TimeStamp_milliseconds);
+			_isKalmanGotFirstState = true;
+		}
+		else
+		{
+			_kalmanFilter.Process(lat, lng, accuracy, (long)TimeStamp_milliseconds);
+		}
+		
+		Vector2 filteredLocation = new Vector2((float)_kalmanFilter.get_lat(), (float)_kalmanFilter.get_lng());
+		
+		return filteredLocation;
+	}
+	
 
 	/////////////////////////////////////////////////
 	//////-------------Public API--------------//////
@@ -37,6 +75,7 @@ public sealed class GPSEncoder {
 		return GetInstance().ConvertGPStoUCS(gps);
 	}
 	
+	
 	/// <summary>
 	/// Convert GPS (Lat, Lon) coordinates to UCS (X,Y,Z) coordinates
 	/// </summary>
@@ -47,7 +86,7 @@ public sealed class GPSEncoder {
 	{
 		return GetInstance().ConvertGPStoUCS(new Vector2(latitude,longitude));
 	}
-	
+
 	/// <summary>
 	/// Change the relative GPS offset (Lat, Lon), Default (0,0), 
 	/// used to bring a local area to (0,0,0) in UCS coordinate system

@@ -36,7 +36,7 @@ public class WebSocketsBehaviour : MonoBehaviour
         }
     }
 
-    public string GetWSConnectionState()
+    public static string GetWsConnectionState()
     {
         return _client.State.ToString();
     }
@@ -62,7 +62,8 @@ public class WebSocketsBehaviour : MonoBehaviour
 
                 return;
             }
-            else if (_client != null && (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
+            else if (_client != null &&
+                     (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
             {
                 Debug.LogError("Connection not established to send self location");
                 await TryToConnectToServer();
@@ -72,7 +73,6 @@ public class WebSocketsBehaviour : MonoBehaviour
         {
             //Debug.LogError("Connection not free for SendSelfLocationToServer");
         }
-
     }
 
     private async Task TryToConnectToServer()
@@ -88,38 +88,49 @@ public class WebSocketsBehaviour : MonoBehaviour
 
     public async Task<string> ReceiveObjectsFromServer(string jsonRequestString)
     {
-        if (connectionFree)
+        try
         {
-            if (_client != null && _client.State == WebSocketState.Open)
+            if (connectionFree)
             {
-                await SendSelfLocationToServer(jsonRequestString);
+                if (_client != null && _client.State == WebSocketState.Open)
+                {
+                    await SendSelfLocationToServer(jsonRequestString);
 
-                byte[] buffer = new byte[65536];
-                var segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                    byte[] buffer = new byte[65536];
+                    ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
 
-                // lock semaphore
-                connectionFree = false;
+                    // lock semaphore
+                    connectionFree = false;
 
-                await _client.ReceiveAsync(segment, CancellationToken.None);
+                    await _client.ReceiveAsync(segment, CancellationToken.None);
 
-                // unlock semaphore
-                connectionFree = true;
+                    // unlock semaphore
+                    connectionFree = true;
 
-                string jsonString = Encoding.UTF8.GetString(segment.Array);
-                //Debug.Log(jsonString + " Received from server");
-                return jsonString;
+                    string jsonString = Encoding.UTF8.GetString(segment.Array);
+                    //Debug.Log(jsonString + " Received from server");
+                    return jsonString;
+                }
+                else if (_client != null &&
+                         (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
+                {
+                    Debug.LogError("Connection not established to send self location");
+                    await TryToConnectToServer();
+                }
             }
-            else if (_client != null && (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
+            else
             {
-                Debug.LogError("Connection not established to send self location");
-                await TryToConnectToServer();
+                //Debug.LogError("Connection not free for ReceiveObjectsFromServer");
             }
+
+            return "";
         }
-        else
+        catch (Exception e)
         {
-            //Debug.LogError("Connection not free for ReceiveObjectsFromServer");
+            Console.WriteLine(e);
+            Start();
+            return "";
         }
-        return "";
     }
 
     private async Task ConnectToSenseServer()
@@ -127,4 +138,3 @@ public class WebSocketsBehaviour : MonoBehaviour
         await _client.ConnectAsync(_senseServerURI, CancellationToken.None);
     }
 }
-
