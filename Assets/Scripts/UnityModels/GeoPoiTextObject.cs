@@ -33,8 +33,6 @@ namespace UnityModels
             this.distance.text = Convert.ToUInt32(distance).ToString() + " meters";
             Debug.Log("initialized " + geoObjectModel.name);
         }
-        
-
     }
 }
 

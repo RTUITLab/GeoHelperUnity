@@ -23,9 +23,13 @@
     <explicitExcludes>
       <Path>.git</Path>
       <Path>.idea</Path>
-      <Path>Library</Path>
+      <Path>.vs</Path>
+      <Path>Logs</Path>
       <Path>Temp</Path>
+      <Path>Tools</Path>
       <Path>build</Path>
+      <Path>build1</Path>
+      <Path>build2</Path>
       <Path>landing</Path>
       <Path>obj</Path>
     </explicitExcludes>
