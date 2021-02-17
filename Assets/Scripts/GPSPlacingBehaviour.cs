@@ -19,8 +19,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// Prefab for geoobject type "text"
     /// </summary>
     public GameObject POI_object_text;
-    public GameObject audioGameObject;
-    public GameObject modelGameObject;
+    public GameObject audioPrefabGameObject;
 
     /// <summary>
     /// Var for showing current location of user
@@ -633,7 +632,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
            
             GameObject newGameObject =
-                Instantiate(modelGameObject, objectPlace, Quaternion.identity) as GameObject;
+                Instantiate(audioPrefabGameObject, objectPlace, Quaternion.identity) as GameObject;
 
             newGameObject.transform.SetParent(ToNorth.transform);
             newGameObject.tag = nameof(GeoAudioObject);
