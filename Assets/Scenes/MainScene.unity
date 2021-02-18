@@ -148,8 +148,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 2027015975}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
@@ -534,7 +534,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1448312108
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,10 +612,10 @@ MonoBehaviour:
   currentLocationLog: {fileID: 1938677946}
   ToNorth: {fileID: 223974226}
   isDebug: 0
-  fakeCompassTrueHeading: 0
+  fakeCompassTrueHeading: 90
   fakeCurrentLocationDataModel:
-    lat: 55.55375
-    lng: 37.4669
+    lat: 55.669895
+    lng: 37.479836
 --- !u!114 &1571473010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1014,7 +1014,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 816896761}
-  - {fileID: 223974227}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

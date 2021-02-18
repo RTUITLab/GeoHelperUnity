@@ -19,6 +19,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// Prefab for geoobject type "text"
     /// </summary>
     public GameObject POI_object_text;
+
     public GameObject audioPrefabGameObject;
 
     /// <summary>
@@ -41,8 +42,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// </summary>
     private static bool isSceneReadyToChange = true;
 
-    private bool gpsLocationInitialized = false;
-
     private bool isLocalOriginForGpsEncoderSet = false;
 
     private WebSocketsBehaviour webSockets;
@@ -61,8 +60,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private float offsetFromTrue;
 
-    private bool firstIterFlag = true;
-
     /// <summary>
     ///     Frequency at which we check our device location (to save battery).
     /// </summary>
@@ -76,19 +73,20 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private float maxAudioDistance = 20f;
     
-    
+    private bool notInitToNorth = true;
+
     /// <summary>
     /// Pack of audio on scene
     /// </summary>
     List<String> downloadedAudio;
-    
-    
+
 
     [Header("Debug mode")] [SerializeField]
     private bool isDebug = true;
 
     [SerializeField] private float fakeCompassTrueHeading;
     [SerializeField] private LocationDataModel fakeCurrentLocationDataModel = null;
+
 
     private async Task Start()
     {
@@ -135,8 +133,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
             gameObj.transform.LookAt(_mainCamera.transform);
         }
 
-        if (!gpsLocationInitialized) 
+        if (!IsInputLocationRunning())
             return;
+
         LocationDataModel locInfo = GetUserLocationData();
         UpdateGeoObjectsPositions(locInfo.lat, locInfo.lng);
 
@@ -156,24 +155,19 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async void LateUpdate()
     {
-        if (WebSocketsBehaviour.GetWsConnectionState() == "Open" && isSceneReadyToChange && currentLocation != null)
+        try
         {
+            if (WebSocketsBehaviour.GetWsConnectionState() != "Open" || !isSceneReadyToChange ||
+                currentLocation == null)
+                return;
+
             isSceneReadyToChange = false;
-            if (firstIterFlag)
-            {
-                firstIterFlag = false;
-                _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
-            }
             await TestPlacingObjects();
             isSceneReadyToChange = true;
-
-            if (compasTimer == 0)
-            {
-                // Debug.Log(GetCompassTrueHeading());
-                compasTimer = 15;
-            }
-            else
-                compasTimer--;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
         }
     }
 
@@ -199,45 +193,50 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
                 Vector3 positionOfGeoObject = GPSEncoder.GPSToUCS(geoObject.gpsLocation.lat,
                     geoObject.gpsLocation.lng);
+
                 double diffInMBetweenUserAndGpsOfObject = DistanceBetween2GeoobjectsInM(lat, lng,
                     geoObject.gpsLocation.lat, geoObject.gpsLocation.lng);
                 float diffInMBetweenPrevObjV3LocAndNewV3LocOfObject = Vector3
-                    .Distance(geoObject.transform.position, positionOfGeoObject);
+                    .Distance(geoObject.transform.localPosition, positionOfGeoObject);
+
                 if (geoObject is GeoPoiTextObject geoPoiTextObject)
                 {
                     // if distance to POI greater then maxDistanceToPOIGeoObject units then normalize to maxDistanceToPOIGeoObject
-                    
+
 
                     if (accuracyOfPlacingObjectToSceneInM <= diffInMBetweenUserAndGpsOfObject &&
                         diffInMBetweenUserAndGpsOfObject <= maxDistanceToPOIGeoobject &&
                         accuracyOfPlacingObjectToSceneInM <= diffInMBetweenPrevObjV3LocAndNewV3LocOfObject)
                     {
-                        geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
+                        geoPoiTextObject.transform.localPosition = Vector3.Lerp(
+                            geoPoiTextObject.transform.localPosition,
                             positionOfGeoObject, 1f * Time.deltaTime);
-                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object localPosition of" +
                         //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
                         //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
-                        //           $"\n Updated V3 to {geoPoiTextObject.transform.position}m");
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.localPosition}m");
                     }
                     else if (diffInMBetweenUserAndGpsOfObject > maxDistanceToPOIGeoobject)
                     {
                         // TODO TEST: Checking influence of this repositioning of object
 
-                        var newPosition = (positionOfGeoObject
-                                           - _mainCamera.transform.position).normalized * maxDistanceToPOIGeoobject
-                                          + _mainCamera.transform.position;
+                        Vector3 cameraLocalPosition = _mainCamera.transform.position;
+                        Vector3 newPosition = (positionOfGeoObject
+                                               - cameraLocalPosition).normalized * maxDistanceToPOIGeoobject
+                                              + cameraLocalPosition;
 
-                        geoPoiTextObject.transform.position = Vector3.Lerp(geoPoiTextObject.transform.position,
+                        geoPoiTextObject.transform.localPosition = Vector3.Lerp(
+                            geoPoiTextObject.transform.localPosition,
                             newPosition, 1f * Time.deltaTime);
-                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object localPosition of" +
                         //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
                         //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
-                        //           $"\n Updated V3 to {geoPoiTextObject.transform.position}m");
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.localPosition}m");
                     }
                     else
                     {
                         // TODO TEST: Checking influence of this repositioning of object
-                        // geoPoiTextObject.transform.position = positionOfGeoObject;
+                        // geoPoiTextObject.transform.localPosition = positionOfGeoObject;
                     }
 
                     double distanceToObject = DistanceBetween2GeoobjectsInM(lat, lng,
@@ -247,32 +246,31 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 }
                 else if (geoObject is GeoAudioObject geoAudioObject)
                 {
-                    
                     if (accuracyOfPlacingObjectToSceneInM <= diffInMBetweenUserAndGpsOfObject &&
                         diffInMBetweenUserAndGpsOfObject <= maxDistanceToPOIGeoobject &&
                         accuracyOfPlacingObjectToSceneInM <= diffInMBetweenPrevObjV3LocAndNewV3LocOfObject)
                     {
-                        geoAudioObject.transform.position = Vector3.Lerp(geoAudioObject.transform.position,
+                        geoAudioObject.transform.localPosition = Vector3.Lerp(geoAudioObject.transform.localPosition,
                             positionOfGeoObject, 1f * Time.deltaTime);
-                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object position of" +
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object localPosition of" +
                         //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
                         //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
-                        //           $"\n Updated V3 to {geoPoiTextObject.transform.position}m");
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.localPosition}m");
                     }
-                    
+
                     //float distance = (float)DistanceBetween2GeoobjectsInM(lat, lng,
                     //    geoAudioObject.gpsLocation.lat, geoAudioObject.gpsLocation.lng);
                     float distance =
-                        Vector3.Distance(_mainCamera.transform.position, geoAudioObject.transform.position);
-                    
-                    Debug.Log("distance = " + distance + "volume = " + geoAudioObject.GetComponent<AudioSource>().volume);
+                        Vector3.Distance(_mainCamera.transform.position, geoAudioObject.transform.localPosition);
+
+                    // Debug.Log("distance = " + distance + "volume = " + geoAudioObject.GetComponent<AudioSource>().volume);
                     if (distance <= maxAudioDistance && distance != 0)
                     {
                         geoAudioObject.GetComponent<MeshRenderer>().enabled = true;
                         geoAudioObject.GetComponent<AudioSource>().volume = 1 / distance;
                     }
 
-                    else if (distance == 0 )
+                    else if (distance == 0)
                     {
                         geoAudioObject.GetComponent<AudioSource>().volume = 1;
                         geoAudioObject.GetComponent<MeshRenderer>().enabled = true;
@@ -282,7 +280,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         geoAudioObject.GetComponent<AudioSource>().volume = 0;
                         geoAudioObject.GetComponent<MeshRenderer>().enabled = false;
                     }
-
                 }
                 else if (geoObject is Geo3dObject geo3dObject)
                 {
@@ -298,7 +295,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
     private async Task TestPlacingObjects()
     {
-        if (!gpsLocationInitialized)
+        if (!IsInputLocationRunning())
             return;
 
         LocationDataModel lastKnownLocation = GetUserLocationData();
@@ -334,8 +331,17 @@ public class GPSPlacingBehaviour : MonoBehaviour
         // Debug.Log($"Got response: {responseData}");
 
         // json response from server for user location request
-        ResponseFromServerLocationDataModel response =
-            JsonConvert.DeserializeObject<ResponseFromServerLocationDataModel>(responseData);
+        ResponseFromServerLocationDataModel response = null;
+        try
+        {
+            response =
+                JsonConvert.DeserializeObject<ResponseFromServerLocationDataModel>(responseData);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
+
 
         if (response == null || !response.success)
         {
@@ -374,7 +380,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
 
         // GPSEncoder.SetLocalOrigin(new Vector2(currentLocation.lat, currentLocation.lng));
-        // _arSessionOrigin.transform.position =
+        // _arSessionOrigin.transform.localPosition =
         //     GPSEncoder.GPSToUCS(currentLocation.lat, currentLocation.lng);
 
         // if (Input.compass.enabled)
@@ -387,6 +393,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
 
         // 
+        if(notInitToNorth)
+        {
+            _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
+            notInitToNorth = false;
+        }
+
 
         await AddNewObjectsToScene(packGeoObjectsFromServer);
     }
@@ -449,10 +461,12 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 {
                     // TODO TEST: Checking influence of this repositioning of object
 
+                    Vector3 mainCameraLocalPosition = _mainCamera.transform.position;
                     objectPlace = (objectPlace
-                                   - _mainCamera.transform.position).normalized * maxDistanceToPOIGeoobject
-                                  + _mainCamera.transform.position;
+                                   - mainCameraLocalPosition).normalized * maxDistanceToPOIGeoobject
+                                  + mainCameraLocalPosition;
                 }
+
                 GameObject newGameObject =
                     Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
 
@@ -461,8 +475,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 newGameObject.tag = nameof(GeoPoiTextObject);
 
                 // init content of geoObject(point of interest)
-                Debug.Log("!!!!!"+ newGameObject.GetComponent<GeoPoiTextObject>());
-                
+                // Debug.Log("!!!!!"+ newGameObject.GetComponent<GeoPoiTextObject>());
+
                 newGameObject.GetComponent<GeoPoiTextObject>()
                     .Initialize(geoPoiObjectModel, diffInMBetweenUserAndGpsOfObject);
                 Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {geoPoiObjectModel.name} " +
@@ -474,11 +488,11 @@ public class GPSPlacingBehaviour : MonoBehaviour
             }
             else if (geoObjectModel is GeoAudioObjectModel geoAudioObjectModel)
             {
-                if(!downloadedAudio.Contains(geoAudioObjectModel.id))
+                if (!downloadedAudio.Contains(geoAudioObjectModel.id))
                 {
-                    Debug.Log("url = " + geoAudioObjectModel.url);
+                    // Debug.Log("url = " + geoAudioObjectModel.url);
                     downloadedAudio.Add(geoAudioObjectModel.id);
-                    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    ////////////////////////
                     StartCoroutine(LoadAudioFromServer(geoAudioObjectModel.url, AudioType.MPEG, geoAudioObjectModel));
                 }
             }
@@ -501,14 +515,21 @@ public class GPSPlacingBehaviour : MonoBehaviour
         if (isDebug)
         {
             currentLocation = GetUserLocationData();
-            gpsLocationInitialized = true;
+            _arSessionOrigin.transform.rotation = Quaternion.Euler(0, GetCompassTrueHeading(), 0);
             return;
         }
 
-        if (!gpsLocationInitialized)
+        if (!IsInputLocationRunning())
         {
             StartCoroutine(FetchLocationData());
         }
+    }
+
+    private bool IsInputLocationRunning()
+    {
+        if (isDebug)
+            return true;
+        return Input.location.status == LocationServiceStatus.Running;
     }
 
     private float GetCompassTrueHeading()
@@ -527,8 +548,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
         }
         else
         {
-            var lat = Input.location.lastData.latitude;
-            var lng = Input.location.lastData.longitude;
+            if (!IsInputLocationRunning())
+                throw new Exception("Input location not initialized for getting location");
+            float lat = Input.location.lastData.latitude;
+            float lng = Input.location.lastData.longitude;
             filteredLocation = GPSEncoder
                 .GetFilteredVector2(lat, lng, Input.location.lastData.horizontalAccuracy,
                     Input.location.lastData.timestamp * 1000);
@@ -571,20 +594,17 @@ public class GPSPlacingBehaviour : MonoBehaviour
             yield break;
         }
 
-        // Connection has failed
-        if (Input.location.status == LocationServiceStatus.Failed)
+        switch (Input.location.status)
         {
-            Debug.Log($"{DateTime.Now:HH:mm:ss tt} Unable to determine device location");
-            yield break;
-        }
-        else
-        {
-            currentLocation = GetUserLocationData();
-            gpsLocationInitialized = true;
-            Input.compass.enabled = true;
+            case LocationServiceStatus.Failed:
+                Debug.Log($"{DateTime.Now:HH:mm:ss tt} Unable to determine device location");
+                break;
+            case LocationServiceStatus.Running:
+                Input.compass.enabled = true;
+                currentLocation = GetUserLocationData();
+                break;
         }
     }
-
 
     private void OnDisable()
     {
@@ -609,17 +629,16 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         return d * 1000;
     }
-    
-    IEnumerator LoadAudioFromServer(string url, 
+
+    IEnumerator LoadAudioFromServer(string url,
         AudioType audioType,
         GeoAudioObjectModel audioObj)
     {
-        
         var request = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
-        Debug.Log("1!!!");
+        // Debug.Log("1!!!");
         yield return request.SendWebRequest();
 
-        
+
         if (!request.isHttpError && !request.isNetworkError)
         {
             //////////////////////
@@ -630,19 +649,19 @@ public class GPSPlacingBehaviour : MonoBehaviour
             double diffInMBetweenUserAndGpsOfObject = DistanceBetween2GeoobjectsInM(currentLocation.lat,
                 currentLocation.lng, audioObj.position.lat, audioObj.position.lng);
 
-           
+
             GameObject newGameObject =
                 Instantiate(audioPrefabGameObject, objectPlace, Quaternion.identity) as GameObject;
 
             newGameObject.transform.SetParent(ToNorth.transform);
             newGameObject.tag = nameof(GeoAudioObject);
-            Debug.Log("2!!!");
-            AudioClip audio = DownloadHandlerAudioClip.GetContent(request); 
-            Debug.Log(newGameObject.GetComponent<GeoAudioObject>() + "       ");
+            // Debug.Log("2!!!");
+            AudioClip audio = DownloadHandlerAudioClip.GetContent(request);
+            // Debug.Log(newGameObject.GetComponent<GeoAudioObject>() + "       ");
             // init content of geoObject(point of interest)
             newGameObject.GetComponent<GeoAudioObject>()
                 .Initialize(audioObj, audio);
-            Debug.Log("3!!!");
+            // Debug.Log("3!!!");
             Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {audioObj.name} " +
                       $"at location lat: {audioObj.position.lat}, lng: {audioObj.position.lng}. " +
                       $"\n Updated Distance to {diffInMBetweenUserAndGpsOfObject}m");
@@ -651,15 +670,15 @@ public class GPSPlacingBehaviour : MonoBehaviour
             geoObjectsInScene.Add(audioObj.id, newGameObject);
             newGameObject.GetComponent<AudioSource>().volume = 0;
             newGameObject.GetComponent<AudioSource>().Play();
-            
+
             ///////////////////////
             ///audioSource.Play();
         }
         else
         {
             Debug.LogErrorFormat("error request [{0}, {1}]", url, request.error);
-
         }
+
         request.Dispose();
     }
 }
