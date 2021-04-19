@@ -9,6 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/MainScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: a3ad8429b50d64d0ea642e75ad1958b2,
+      type: 2}
     com.unity.xr.arcore.PlayerSettings: {fileID: 11400000, guid: fe2574f95928848928e5adcd73c4684e,
       type: 2}
     com.unity.xr.arkit.PlayerSettings: {fileID: 11400000, guid: f316505391c7e4226b6989c7e8fc9c88,
