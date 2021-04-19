@@ -148,8 +148,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 2027015975}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
@@ -256,6 +256,7 @@ GameObject:
   - component: {fileID: 816896760}
   - component: {fileID: 816896759}
   - component: {fileID: 816896758}
+  - component: {fileID: 816896762}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: MainCamera
@@ -349,7 +350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Device: 0
-  m_PoseSource: 6
+  m_PoseSource: 2
   m_PoseProviderComponent: {fileID: 0}
   m_TrackingType: 0
   m_UpdateType: 0
@@ -368,6 +369,14 @@ Transform:
   m_Father: {fileID: 2027015975}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &816896762
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816896756}
+  m_Enabled: 1
 --- !u!1 &949144228
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,13 +607,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   POI_object_text: {fileID: 7729553051228982093, guid: 7fd4e39c90cc740758e8a28dd41b80ee,
     type: 3}
+  audioPrefabGameObject: {fileID: 9159537069380098256, guid: a7dbdd508737b0d49b444c4263d812f1,
+    type: 3}
   currentLocationLog: {fileID: 1938677946}
   ToNorth: {fileID: 223974226}
   isDebug: 0
-  fakeCompassTrueHeading: 0
+  fakeCompassTrueHeading: 90
   fakeCurrentLocationDataModel:
-    lat: 55.55375
-    lng: 37.4669
+    lat: 55.669895
+    lng: 37.479836
 --- !u!114 &1571473010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1003,7 +1014,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 816896761}
-  - {fileID: 223974227}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

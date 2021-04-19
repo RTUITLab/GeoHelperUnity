@@ -3,86 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Threading.Tasks;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Text;
 
+using NativeWebSocket;
+
 public class WebSocketsBehaviour : MonoBehaviour
 {
-    private static ClientWebSocket _client;
-    private Uri _senseServerURI;
-
+    private static WebSocket _websocket;
+    private const string WebSocketConnectionString = "wss://geohelper.rtuitlab.dev/api/test";
     /// <summary>
     /// Simple semaphore for checking state of actions of websocket connection
     /// to do next action with websocket connection
     /// </summary>
     private static bool connectionFree = true;
 
-
-    private readonly string webSocketConnectionString = "wss://geohelper.rtuitlab.dev/api/test";
+    private static string _responseDataString = "";
 
     private async void Start()
     {
-        _client = new ClientWebSocket();
-        _senseServerURI = new Uri(webSocketConnectionString);
-        await ConnectToSenseServer();
+        // websocket = new WebSocket("ws://echo.websocket.org");
+        _websocket = new WebSocket(WebSocketConnectionString);
+
+
+        _websocket.OnOpen += () =>
+        {
+            Debug.Log("Connection open!");
+        };
+
+        _websocket.OnError += (e) =>
+        {
+            Debug.LogError("Error! " + e);
+        };
+
+        _websocket.OnClose += (e) =>
+        {
+            Debug.LogWarning("Connection closed!");
+        };
+
+        _websocket.OnMessage += (bytes) =>
+        {
+            // Reading a plain text message
+            var message = System.Text.Encoding.UTF8.GetString(bytes);
+            // Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
+            _responseDataString = message;
+        };
+
+        await _websocket.Connect();
     }
 
-    private async void Update()
+    private void Update()
     {
-        if (_client != null && _client.State != WebSocketState.Open)
-        {
-            await TryToConnectToServer();
-        }
+#if !UNITY_WEBGL || UNITY_EDITOR
+        _websocket.DispatchMessageQueue();
+#endif
     }
+
+    // private async void Update()
+    // {
+    //     if (_client != null && _client.State != WebSocketState.Open)
+    //     {
+    //         await TryToConnectToServer();
+    //     }
+    // }
 
     public static string GetWsConnectionState()
     {
-        return _client.State.ToString();
+        return _websocket.State.ToString();
     }
 
-    private async Task SendSelfLocationToServer(string jsonRequestString)
+    private static async Task SendSelfLocationToServer(string jsonRequestString)
     {
         if (connectionFree)
         {
-            if (_client != null && _client.State == WebSocketState.Open)
+            if (_websocket != null && _websocket.State == WebSocketState.Open)
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(jsonRequestString);
-                ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
 
                 // lock semaphore
                 connectionFree = false;
-
-                await _client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-
+    
+                await _websocket.SendText(jsonRequestString);
+    
                 //Debug.Log($"Sended location request: {jsonRequestString}");
-
+    
                 // unlock semaphore
                 connectionFree = true;
-
-                return;
             }
-            else if (_client != null &&
-                     (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
-            {
-                Debug.LogError("Connection not established to send self location");
-                await TryToConnectToServer();
-            }
-        }
-        else
-        {
-            //Debug.LogError("Connection not free for SendSelfLocationToServer");
-        }
-    }
-
-    private async Task TryToConnectToServer()
-    {
-        Debug.Log("Connection state: " + _client.State);
-        if (_client != null && (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
-        {
-            Debug.Log("TryToConnectToServer");
-            await ConnectToSenseServer();
-            Debug.Log("Connection state: " + _client.State);
         }
     }
 
@@ -90,51 +96,37 @@ public class WebSocketsBehaviour : MonoBehaviour
     {
         try
         {
-            if (connectionFree)
-            {
-                if (_client != null && _client.State == WebSocketState.Open)
-                {
-                    await SendSelfLocationToServer(jsonRequestString);
-
-                    byte[] buffer = new byte[65536];
-                    ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-
-                    // lock semaphore
-                    connectionFree = false;
-
-                    await _client.ReceiveAsync(segment, CancellationToken.None);
-
-                    // unlock semaphore
-                    connectionFree = true;
-
-                    string jsonString = Encoding.UTF8.GetString(segment.Array);
-                    //Debug.Log(jsonString + " Received from server");
-                    return jsonString;
-                }
-                else if (_client != null &&
-                         (_client.State == WebSocketState.Aborted || _client.State == WebSocketState.Closed))
-                {
-                    Debug.LogError("Connection not established to send self location");
-                    await TryToConnectToServer();
-                }
-            }
-            else
-            {
-                //Debug.LogError("Connection not free for ReceiveObjectsFromServer");
-            }
-
-            return "";
+            if (!connectionFree 
+                || _websocket == null 
+                || _websocket.State != WebSocketState.Open) 
+                return "";
+            
+            await SendSelfLocationToServer(jsonRequestString);
+            
+            StartCoroutine(WaitResponseFromServer());
+            
+            string response = _responseDataString;
+            _responseDataString = "";
+            
+            return response;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            Start();
+            Debug.LogError(e);
             return "";
         }
     }
 
-    private async Task ConnectToSenseServer()
+    private static IEnumerator WaitResponseFromServer()
     {
-        await _client.ConnectAsync(_senseServerURI, CancellationToken.None);
+        if (_responseDataString == "")
+            yield return new WaitForSeconds(1f);
+        
     }
+    
+    private async void OnApplicationQuit()
+    {
+        await _websocket.Close();
+    }
+
 }
