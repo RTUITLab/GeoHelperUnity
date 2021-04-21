@@ -5,13 +5,13 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
-
+using EnvironmentConstants;
 using NativeWebSocket;
 
 public class WebSocketsBehaviour : MonoBehaviour
 {
     private static WebSocket _websocket;
-    private const string WebSocketConnectionString = "wss://geohelper.rtuitlab.dev/api/test";
+    private string WebSocketConnectionString = null;
     /// <summary>
     /// Simple semaphore for checking state of actions of websocket connection
     /// to do next action with websocket connection
@@ -22,6 +22,8 @@ public class WebSocketsBehaviour : MonoBehaviour
 
     private async void Start()
     {
+        WebSocketConnectionString = LocalEnvironment.SERVER_WS_CONNECTION_STRING;
+        
         // websocket = new WebSocket("ws://echo.websocket.org");
         _websocket = new WebSocket(WebSocketConnectionString);
 

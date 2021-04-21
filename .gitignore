@@ -56,3 +56,7 @@ Assets/Plugins/GitHub
 .idea/
 
 buildIOS/
+
+Assets/EnvironmentConstants/
+
+Assets/EnvironmentConstants.meta
