@@ -5,35 +5,59 @@ using Newtonsoft.Json;
 namespace ServerModels
 {
     [Serializable]
-    class EndLocation
+    public class Entity
     {
         [JsonProperty("_id")]
-        private string geoObjectId;
+        public string geoObjectId;
         [JsonProperty("position")]
-        private LocationDataModel position;
-        
+        public LocationDataModel position;
+        [JsonProperty("type")]
+        public string type;
+        public override string ToString()
+        {
+            return $"geoObjectId: {geoObjectId}; pos: {position.ToString()}; type: {type.ToString()}";
+        }
+    }
+    
+    [Serializable]
+    public class EndLocation
+    {
+        [JsonProperty("entity")] 
+        public Entity entity;
+
+        public override string ToString()
+        {
+            return $" {entity.ToString()}";
+        }
     }
 
     [Serializable]
-    class Step : LocationDataModel
+    public class Step : LocationDataModel
     {
         public Step(float lat, float lng) : base(lat, lng)
         {
         }
         
         [JsonProperty("id")]
-        private int _stepId;
-        
+        public int _stepId;
+
+        public override string ToString()
+        {
+            return base.ToString() + $" stepId{_stepId.ToString()}";
+        }
     }
     
     [Serializable]
     public class Message
     {
         [JsonProperty("end_location")]
-        private EndLocation _endLocation;        
+        public EndLocation _endLocation;        
         [JsonProperty("steps")]
-        private List<Step> _steps;
-        
+        public List<Step> _steps;
+        public override string ToString()
+        {
+            return $"{_endLocation.ToString()} \n {string.Join("; ", _steps)}";
+        }
     }
     
     [Serializable]
@@ -44,10 +68,9 @@ namespace ServerModels
         [JsonProperty("message")]
         public Message message;
 
-        /*public override string ToString()
+        public override string ToString()
         {
-            return $"Response success: {success} \n {poiObjectModels.ToString()}" +
-                   $" \n {geoAudioObjectModels} \n {geo3dObjectModels}";
-        }*/
+            return $"Response success: {success.ToString()} \n {message.ToString()}";
+        }
     }
 }

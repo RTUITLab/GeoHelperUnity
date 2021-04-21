@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -87,7 +87,10 @@ public class GPSPlacingBehaviour : MonoBehaviour
     [SerializeField] private float fakeCompassTrueHeading;
     [SerializeField] private LocationDataModel fakeCurrentLocationDataModel = null;
 
-
+    public LocationDataModel GetCurrentLocationData()
+    {
+        return currentLocation;
+    }
     private async Task Start()
     {
         DetermineApplicationPlatform();

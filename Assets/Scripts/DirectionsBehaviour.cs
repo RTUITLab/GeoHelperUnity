@@ -1,45 +1,176 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using EnvironmentConstants;
 using Newtonsoft.Json;
 using ServerModels;
 using UnityEngine;
 using UnityEngine.Networking;
 
+[RequireComponent(typeof(GPSPlacingBehaviour))]
 public class DirectionsBehaviour : MonoBehaviour
 {
-    private const string _serverApiString = "https://geo-helper.ga/api/v1/";
-    private const string _token = "token";
-    
+    private string _serverApiString = null;
+    private Camera _mainCamera = null;
+    public GameObject lineRenderPrefab;
+    private string _authToken = null;
+    private string _authLogin = null;
+    private string _authPassword = null;
+    private LocationDataModel _currentGpsLocation = null;
+    private List<Step> _directionSteps = null;
+    private LineRenderer _lineRenderer = null;
+    private bool _userArrivedToPlace = false;
+
+    private void Start()
+    {
+        _serverApiString = LocalEnvironment.SERVER_API;
+        _authLogin = LocalEnvironment.AUTH_USERNAME;
+        _authPassword = LocalEnvironment.AUTH_PASSWORD;
+        
+        _mainCamera = Camera.main;
+        StartGettingDirection();
+    }
+
+    private void Update()
+    {
+        if (_lineRenderer != null 
+            && _lineRenderer.positionCount > 0)
+        {
+            if (_lineRenderer.positionCount == 1)
+            {
+                _userArrivedToPlace = true;
+                _lineRenderer.positionCount--;
+                Debug.Log("USER Arrived To Place");
+            }
+            else if (_lineRenderer.positionCount >= 2)
+            {
+                var positions = new Vector3[_lineRenderer.positionCount];
+                _lineRenderer.GetPositions(positions);
+                var distanceToClosestPoint = Vector3.Distance(_mainCamera.transform.position, positions[1]);
+                if (distanceToClosestPoint < 1)
+                { 
+                    var positionsList = positions.ToList();
+                    positionsList.RemoveAt(0);
+                    _lineRenderer.positionCount--;
+                    _lineRenderer.SetPositions(positionsList.ToArray());
+                }
+            }
+        }
+
+    }
 
     void StartGettingDirection()
     {
-        StartCoroutine(GetDirection());
+        string geoObjectId = "5fa5713ff2d0d630382b42c8";
+
+        _userArrivedToPlace = false;
+
+        _currentGpsLocation = GameObject.FindObjectOfType<GPSPlacingBehaviour>().GetCurrentLocationData();
+
+        StartCoroutine(GetAuthToken());
+        StartCoroutine(GetDirection(geoObjectId, _currentGpsLocation));
     }
-    
-    IEnumerator GetDirection()
+
+    IEnumerator GetAuthToken()
     {
-        string requestString = _serverApiString + "direction";
-        UnityWebRequest www = UnityWebRequest.Get(_serverApiString);
-        www.SetRequestHeader("Authorization", "Bearer " + _token);
-        
+        var jsonData = "{\"username\": \"" + _authLogin + "\", \"password\": \"" + _authPassword + "\" }";
+        string requestString = _serverApiString + "auth";
+
+        var www = new UnityWebRequest(requestString, "POST");
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
+        www.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
+        www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        www.SetRequestHeader("Content-Type", "application/json");
+
         yield return www.SendWebRequest();
- 
-        if (www.result == UnityWebRequest.Result.ConnectionError) {
+        
+        if (www.result != UnityWebRequest.Result.Success)
+        {
             Debug.LogError(www.error);
             yield break; 
         }
+        string responseText = www.downloadHandler.text;
+        ResponseFromServerToLoginModel response = null;
+        try
+        {
+            response = JsonConvert
+                .DeserializeObject<ResponseFromServerToLoginModel>(responseText);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+            yield break; 
+        }
+        
+        _authToken = response.token;
+    }
+    IEnumerator GetDirection(string geoObjectId, LocationDataModel location)
+    {
+        if (_authToken == null)
+        {
+            yield return new WaitForSeconds(1);
+        }
+         
+         string requestString = _serverApiString + "direction";
+         var uriBuilder = new UriBuilder(requestString);
+         NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+         queryString.Add("lat", location.lat.ToString());
+         queryString.Add("lng", location.lng.ToString());
+         queryString.Add("objectId", geoObjectId);
+         uriBuilder.Query = queryString.ToString();
+         // requestString = uriBuilder.ToString();
+         requestString += "?" + queryString.ToString();
+         UnityWebRequest www = UnityWebRequest.Get(requestString);
+         www.SetRequestHeader("Authorization", "Bearer " + _authToken);
+         
+         yield return www.SendWebRequest();
+         
+         if (www.result != UnityWebRequest.Result.Success) {
+             Debug.LogError(www.error);
+             yield break;
+         }
+
+        string responseText = www.downloadHandler.text;
 
         ResponseFromServerOneToOneDirectionModel response = null;
         try
         {
             response = JsonConvert
-                .DeserializeObject<ResponseFromServerOneToOneDirectionModel>(www.downloadHandler.text);
+                .DeserializeObject<ResponseFromServerOneToOneDirectionModel>(responseText);
         }
         catch (Exception e)
         {
             Debug.LogError(e);
+            yield break; 
         }
         
         Debug.Log(response);
+
+        
+        List<Step> steps = response.message._steps;
+        
+        SetupDirectionObject(steps);
+    }
+
+    void SetupDirectionObject(List<Step> steps)
+    {
+        GameObject directionGameObject = Instantiate(lineRenderPrefab);
+        _lineRenderer = directionGameObject.GetComponent<LineRenderer>();
+        _lineRenderer.positionCount = steps.Count;
+        
+        _lineRenderer.SetPosition(0, _mainCamera.transform.position);
+
+        steps.RemoveAt(0);
+        
+        Vector3 positionOfLineCorner;
+        foreach (var step in steps)
+        {
+            positionOfLineCorner = GPSEncoder.GPSToUCS(step.lat,
+                step.lng);
+            _lineRenderer.SetPosition(step._stepId - 1, positionOfLineCorner);
+        }
+        
     }
 }
