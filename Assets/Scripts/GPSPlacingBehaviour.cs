@@ -91,6 +91,18 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         return currentLocation;
     }
+    public Dictionary<string, string> GetGeoObjectsNamesInScene()
+    {
+        Dictionary<string, string> namesOfGeoObjects = new Dictionary<string, string>();
+        foreach (var keyValuePair in geoObjectsInScene)
+        {
+            namesOfGeoObjects.Add(keyValuePair.Key, keyValuePair.Value.name);
+        }
+        if (namesOfGeoObjects.Count > 0)
+            return namesOfGeoObjects;
+        return null;
+    }
+    
     private async Task Start()
     {
         DetermineApplicationPlatform();
@@ -476,6 +488,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 newGameObject.transform.LookAt(_mainCamera.transform);
                 newGameObject.transform.SetParent(ToNorth.transform);
                 newGameObject.tag = nameof(GeoPoiTextObject);
+                newGameObject.name = geoPoiObjectModel.name;
 
                 // init content of geoObject(point of interest)
                 // Debug.Log("!!!!!"+ newGameObject.GetComponent<GeoPoiTextObject>());
@@ -658,6 +671,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
             newGameObject.transform.SetParent(ToNorth.transform);
             newGameObject.tag = nameof(GeoAudioObject);
+            newGameObject.name = audioObj.name;
             // Debug.Log("2!!!");
             AudioClip audio = DownloadHandlerAudioClip.GetContent(request);
             // Debug.Log(newGameObject.GetComponent<GeoAudioObject>() + "       ");

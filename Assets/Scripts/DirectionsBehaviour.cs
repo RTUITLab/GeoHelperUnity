@@ -6,8 +6,10 @@ using System.Linq;
 using EnvironmentConstants;
 using Newtonsoft.Json;
 using ServerModels;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(GPSPlacingBehaviour))]
 public class DirectionsBehaviour : MonoBehaviour
@@ -22,19 +24,68 @@ public class DirectionsBehaviour : MonoBehaviour
     private List<Step> _directionSteps = null;
     private LineRenderer _lineRenderer = null;
     private bool _userArrivedToPlace = false;
-
+    public Dropdown objectToNavigateDropdown;
+    public TMP_Text displayDropdownMessage;
+    private GPSPlacingBehaviour _gpsPlacingBehaviour;
+    private Dictionary<string, string> _geoObjectsNamesInScene = null;
+    private string _selectedGeoObjectIdInNavigationDropDown = null;
+    public GameObject createDirectionLineBtn;
+    private const int _maxDistanceToClosestObjectInDirectionPoint = 3;
+    
     private void Start()
     {
         _serverApiString = LocalEnvironment.SERVER_API;
         _authLogin = LocalEnvironment.AUTH_USERNAME;
         _authPassword = LocalEnvironment.AUTH_PASSWORD;
-        
+        _gpsPlacingBehaviour = GameObject.FindObjectOfType<GPSPlacingBehaviour>();
         _mainCamera = Camera.main;
-        StartGettingDirection();
+        
+        StartCoroutine(GetAuthToken());
+    }
+
+    private void InitNavigationDropdown()
+    {
+        _geoObjectsNamesInScene = _gpsPlacingBehaviour.GetGeoObjectsNamesInScene();
+        _selectedGeoObjectIdInNavigationDropDown = null;
+        
+        objectToNavigateDropdown.options.Clear();
+        var FirstName = new List<string>();
+        FirstName.Add("Please select object");
+        objectToNavigateDropdown.AddOptions(FirstName);
+        if (_geoObjectsNamesInScene != null)
+        {
+            objectToNavigateDropdown.AddOptions(_geoObjectsNamesInScene.Values.ToList());
+            displayDropdownMessage.text = "Succeed loading names";
+            createDirectionLineBtn.SetActive(true);
+        }
+
+    }
+
+    public void Dropdown_IndexChanged(int index)
+    {
+        if (index == 0)
+        {
+            displayDropdownMessage.text = "Please select object";
+            createDirectionLineBtn.SetActive(false);
+            return;
+        }
+
+        if (_geoObjectsNamesInScene != null)
+        {
+            createDirectionLineBtn.SetActive(true);
+            _selectedGeoObjectIdInNavigationDropDown = 
+                _geoObjectsNamesInScene.Keys.ToList().ElementAt(index - 1);
+        }
+            
     }
 
     private void Update()
     {
+        if (_geoObjectsNamesInScene == null)
+        {
+            InitNavigationDropdown();
+        }
+        
         if (_lineRenderer != null 
             && _lineRenderer.positionCount > 0)
         {
@@ -42,14 +93,14 @@ public class DirectionsBehaviour : MonoBehaviour
             {
                 _userArrivedToPlace = true;
                 _lineRenderer.positionCount--;
-                Debug.Log("USER Arrived To Place");
+                displayDropdownMessage.text = "Вы успешно дошли до пункта назначения";
             }
             else if (_lineRenderer.positionCount >= 2)
             {
                 var positions = new Vector3[_lineRenderer.positionCount];
                 _lineRenderer.GetPositions(positions);
                 var distanceToClosestPoint = Vector3.Distance(_mainCamera.transform.position, positions[1]);
-                if (distanceToClosestPoint < 1)
+                if (distanceToClosestPoint < _maxDistanceToClosestObjectInDirectionPoint)
                 { 
                     var positionsList = positions.ToList();
                     positionsList.RemoveAt(0);
@@ -61,15 +112,14 @@ public class DirectionsBehaviour : MonoBehaviour
 
     }
 
-    void StartGettingDirection()
+    public void StartGettingDirection()
     {
-        string geoObjectId = "5fa5713ff2d0d630382b42c8";
+        string geoObjectId = _selectedGeoObjectIdInNavigationDropDown;
 
         _userArrivedToPlace = false;
 
-        _currentGpsLocation = GameObject.FindObjectOfType<GPSPlacingBehaviour>().GetCurrentLocationData();
-
-        StartCoroutine(GetAuthToken());
+        _currentGpsLocation = _gpsPlacingBehaviour.GetCurrentLocationData();
+        
         StartCoroutine(GetDirection(geoObjectId, _currentGpsLocation));
     }
 
@@ -129,6 +179,7 @@ public class DirectionsBehaviour : MonoBehaviour
          
          if (www.result != UnityWebRequest.Result.Success) {
              Debug.LogError(www.error);
+             displayDropdownMessage.text = "До данного объекта не получается проложить маршрут";
              yield break;
          }
 
@@ -171,6 +222,7 @@ public class DirectionsBehaviour : MonoBehaviour
                 step.lng);
             _lineRenderer.SetPosition(step._stepId - 1, positionOfLineCorner);
         }
-        
+
+        displayDropdownMessage.text = "Маршрут успешно проложен";
     }
 }
