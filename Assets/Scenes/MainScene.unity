@@ -733,7 +733,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 1
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -768,10 +768,10 @@ GameObject:
   m_Component:
   - component: {fileID: 816896761}
   - component: {fileID: 816896757}
-  - component: {fileID: 816896760}
   - component: {fileID: 816896759}
   - component: {fileID: 816896758}
   - component: {fileID: 816896762}
+  - component: {fileID: 816896760}
   m_Layer: 0
   m_Name: AR Camera
   m_TagString: MainCamera
@@ -862,15 +862,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 816896756}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e3c44306fb1e439a9f18b2212b8ab70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Device: 0
-  m_PoseSource: 2
-  m_PoseProviderComponent: {fileID: 0}
-  m_TrackingType: 0
-  m_UpdateType: 0
-  m_UseRelativeTransform: 0
 --- !u!4 &816896761
 Transform:
   m_ObjectHideFlags: 0
@@ -1131,7 +1125,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1137567777}
   - component: {fileID: 1137567776}
-  - component: {fileID: 1137567775}
   - component: {fileID: 1137567774}
   m_Layer: 0
   m_Name: AR Session
@@ -1149,25 +1142,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1137567773}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1760703bbd54c04488a8d10600262ab, type: 3}
+  m_Script: {fileID: 11500000, guid: fa850fbd5b8aded44846f96e35f1a9f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PlanePrefab: {fileID: 4474149840917044181, guid: da7fd2650e9594ec9bcbe59812526109,
-    type: 3}
-  m_DetectionMode: -1
---- !u!114 &1137567775
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1137567773}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 520bb47c46cf8624fafb307b7d1b862a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Camera: {fileID: 816896757}
 --- !u!114 &1137567776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2239,10 +2216,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1334, y: 750}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -2267,7 +2244,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 31
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
