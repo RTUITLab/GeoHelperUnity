@@ -8,6 +8,7 @@ TagManager:
   - GeoAudioObject
   - Geo3dObject
   - GeoPoiTextObject
+  - LineRenderObject
   layers:
   - Default
   - TransparentFX

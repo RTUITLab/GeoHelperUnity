@@ -103,6 +103,15 @@ public class GPSPlacingBehaviour : MonoBehaviour
         return null;
     }
     
+    public GameObject GetGameObjectOfGeoObjectInSceneById(string id)
+    {
+        GameObject gameObject;
+        var isExist = geoObjectsInScene.TryGetValue(id, out gameObject);
+        if (isExist)
+            return gameObject;
+        return null;
+    }
+    
     private async Task Start()
     {
         DetermineApplicationPlatform();

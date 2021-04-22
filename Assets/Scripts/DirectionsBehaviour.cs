@@ -114,6 +114,10 @@ public class DirectionsBehaviour : MonoBehaviour
 
     public void StartGettingDirection()
     {
+        var existingLineRenderObject = GameObject.FindGameObjectWithTag("LineRenderObject");
+        if (existingLineRenderObject)
+            Destroy(existingLineRenderObject);
+        
         string geoObjectId = _selectedGeoObjectIdInNavigationDropDown;
 
         _userArrivedToPlace = false;
@@ -201,27 +205,32 @@ public class DirectionsBehaviour : MonoBehaviour
 
         
         List<Step> steps = response.message._steps;
+        List<Vector3> vector3Steps = new List<Vector3>();
+        foreach (var step in steps)
+        {
+            vector3Steps.Add(GPSEncoder.GPSToUCS(step.lat,
+                step.lng));
+        }
+
+        if (steps.Count == 1)
+        {
+            var gameObject = _gpsPlacingBehaviour.GetGameObjectOfGeoObjectInSceneById(geoObjectId);
+            
+            vector3Steps.Add(gameObject.transform.position);
+        }
+
+        vector3Steps[0] = _mainCamera.transform.position;
         
-        SetupDirectionObject(steps);
+        SetupDirectionObject(vector3Steps);
     }
 
-    void SetupDirectionObject(List<Step> steps)
+    void SetupDirectionObject(List<Vector3> vector3Steps)
     {
         GameObject directionGameObject = Instantiate(lineRenderPrefab);
         _lineRenderer = directionGameObject.GetComponent<LineRenderer>();
-        _lineRenderer.positionCount = steps.Count;
+        _lineRenderer.positionCount = vector3Steps.Count;
         
-        _lineRenderer.SetPosition(0, _mainCamera.transform.position);
-
-        steps.RemoveAt(0);
-        
-        Vector3 positionOfLineCorner;
-        foreach (var step in steps)
-        {
-            positionOfLineCorner = GPSEncoder.GPSToUCS(step.lat,
-                step.lng);
-            _lineRenderer.SetPosition(step._stepId - 1, positionOfLineCorner);
-        }
+        _lineRenderer.SetPositions(vector3Steps.ToArray());
 
         displayDropdownMessage.text = "Маршрут успешно проложен";
     }

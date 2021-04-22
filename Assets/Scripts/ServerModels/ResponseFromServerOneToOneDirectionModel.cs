@@ -34,8 +34,9 @@ namespace ServerModels
     [Serializable]
     public class Step : LocationDataModel
     {
-        public Step(float lat, float lng) : base(lat, lng)
+        public Step(float lat, float lng, int stepId) : base(lat, lng)
         {
+            _stepId = stepId;
         }
         
         [JsonProperty("id")]
