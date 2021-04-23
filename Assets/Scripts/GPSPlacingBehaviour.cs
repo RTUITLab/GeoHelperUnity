@@ -548,6 +548,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                         Debug.Log("LoadFromFile");
                         GameObject newGameObject =
                                 Instantiate(models[geo3dObjectModel.id], objectPlace, Quaternion.identity) as GameObject;
+                        newGameObject.name = geo3dObjectModel.name;
                         Debug.Log("Instantiate");
                     }
                 }
