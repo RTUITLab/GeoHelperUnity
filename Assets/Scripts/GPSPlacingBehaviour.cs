@@ -11,6 +11,11 @@ using TMPro;
 using UnityEngine.Networking;
 using UnityModels;
 using Object = UnityEngine.Object;
+using System.Net;
+using System.IO;
+using System.ComponentModel;
+using System.IO.Compression;
+using Siccity.GLTFUtility;
 
 [RequireComponent(typeof(WebSocketsBehaviour))]
 public class GPSPlacingBehaviour : MonoBehaviour
@@ -21,6 +26,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     public GameObject POI_object_text;
 
     public GameObject audioPrefabGameObject;
+    public GameObject modelPrefab;
 
     /// <summary>
     /// Var for showing current location of user
@@ -79,6 +85,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// Pack of audio on scene
     /// </summary>
     List<String> downloadedAudio;
+    List<String> downloaded3D;
+    Dictionary<String, GameObject> models;
+    public GameObject wrapper;
 
 
     [Header("Debug mode")] [SerializeField]
@@ -116,7 +125,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
     {
         DetermineApplicationPlatform();
         //
+        downloaded3D = new List<String>();
         downloadedAudio = new List<String>();
+        models = new Dictionary<String, GameObject>();
 
         _arSessionOrigin = GameObject.FindWithTag("ARSessionOrigin");
         _mainCamera = Camera.main;
@@ -307,7 +318,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 }
                 else if (geoObject is Geo3dObject geo3dObject)
                 {
-                    // TODO: Add update 3d object
+
                 }
             }
         }
@@ -523,7 +534,24 @@ public class GPSPlacingBehaviour : MonoBehaviour
             }
             else if (geoObjectModel is Geo3dObjectModel geo3dObjectModel)
             {
-                // TODO: Add adding 3d object
+                if (!downloaded3D.Contains(geo3dObjectModel.id))
+                {
+                    downloaded3D.Add(geo3dObjectModel.id);
+                    Debug.Log("url = " + geo3dObjectModel.url);
+                    downloadZip(geo3dObjectModel.url, geo3dObjectModel.id);
+                    
+                    if (models.ContainsKey(geo3dObjectModel.id))
+                    {
+                        Vector3 objectPlace =
+                GPSEncoder.GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);
+                        
+                        Debug.Log("LoadFromFile");
+                        GameObject newGameObject =
+                                Instantiate(models[geo3dObjectModel.id], objectPlace, Quaternion.identity) as GameObject;
+                        Debug.Log("Instantiate");
+                    }
+                }
+
             }
         }
     }
@@ -707,4 +735,52 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         request.Dispose();
     }
+    private WebClient webClient = null;
+
+    void OnApplicationQuit()
+    {
+        Directory.Delete("dowloads/", true);
+        Debug.Log("1!!!");
+    }
+
+    private void downloadZip(String url, String id)
+    {
+        webClient = new WebClient();
+        webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
+        webClient.QueryString.Add("id", id);
+        webClient.DownloadFileAsync(new Uri(url), id + ".zip");
+    }
+
+    private void Completed(object sender, AsyncCompletedEventArgs e)
+    {
+        string id = ((System.Net.WebClient)(sender)).QueryString["id"];
+        webClient = null;
+        Debug.Log("Download completed!");
+        //extractZip(id);
+        ZipFile.ExtractToDirectory(id + ".zip", "dowloads/" + id);
+        File.Delete(id + ".zip");
+        Debug.Log("Extract completed!");
+        GameObject model = Importer.LoadFromFile("dowloads/" + id + "/scene.gltf");
+        models.Add(id, model);
+        Debug.Log("Here2");
+
+    }
+
+    
+    //private String extract(String id)
+    //{
+        
+        
+    //}
+
+    //async private void extractZip(String id)
+    //{
+    //    await Task.Run(() => extract(id));
+    //}
+
+    //void ResetWrapper()
+    //{
+
+    //}
+
 }
