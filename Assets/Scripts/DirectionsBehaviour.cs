@@ -24,7 +24,7 @@ public class DirectionsBehaviour : MonoBehaviour
     private List<Step> _directionSteps = null;
     private LineRenderer _lineRenderer = null;
     private bool _userArrivedToPlace = false;
-    public Dropdown objectToNavigateDropdown;
+    public TMP_Dropdown objectToNavigateDropdown;
     public TMP_Text displayDropdownMessage;
     private GPSPlacingBehaviour _gpsPlacingBehaviour;
     private Dictionary<string, string> _geoObjectsNamesInScene = null;

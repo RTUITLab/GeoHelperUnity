@@ -26,7 +26,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
     public GameObject POI_object_text;
 
     public GameObject audioPrefabGameObject;
-    public GameObject modelPrefab;
 
     /// <summary>
     /// Var for showing current location of user
@@ -42,6 +41,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
     private const int accuracyOfPlacingObjectToSceneInM = 5;
 
     private LocationDataModel currentLocation = null;
+    
+    private WebClient webClient = null;
 
     /// <summary>
     /// semaphore for sequental requests to server and trying placing objects to scene
@@ -87,7 +88,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
     List<String> downloadedAudio;
     List<String> downloaded3D;
     Dictionary<String, GameObject> models;
-    public GameObject wrapper;
 
 
     [Header("Debug mode")] [SerializeField]
@@ -736,7 +736,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
 
         request.Dispose();
     }
-    private WebClient webClient = null;
 
     void OnApplicationQuit()
     {
