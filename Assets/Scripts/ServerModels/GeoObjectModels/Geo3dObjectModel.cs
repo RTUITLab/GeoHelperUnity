@@ -4,6 +4,10 @@ namespace ServerModels
 {
     public class Geo3dObjectModel : GeoObjectModel
     {
+        public Geo3dObjectModel():base()
+        {
+            
+        }
         public string url { get; set; }
         
         public override string ToString()

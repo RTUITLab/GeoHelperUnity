@@ -3,19 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Threading.Tasks;
-using UnityEngine.XR.ARFoundation;
 using System.Linq;
 using Newtonsoft.Json;
 using ServerModels;
 using TMPro;
 using UnityEngine.Networking;
 using UnityModels;
-using Object = UnityEngine.Object;
 using System.Net;
 using System.IO;
-using System.ComponentModel;
 using System.IO.Compression;
-using Siccity.GLTFUtility;
 
 [RequireComponent(typeof(WebSocketsBehaviour))]
 public class GPSPlacingBehaviour : MonoBehaviour
@@ -26,7 +22,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
     public GameObject POI_object_text;
 
     public GameObject audioPrefabGameObject;
-
+    
     /// <summary>
     /// Var for showing current location of user
     /// </summary>
@@ -57,6 +53,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
     /// Contains objects in scene, where key - id of object from server, value - ref to unity object
     /// </summary>
     private static Dictionary<string, GameObject> geoObjectsInScene = new Dictionary<string, GameObject>();
+    
+    List<string> notInitedGeoObjects;
 
     private int compasTimer = 0;
 
@@ -82,12 +80,6 @@ public class GPSPlacingBehaviour : MonoBehaviour
     
     private bool notInitToNorth = true;
 
-    /// <summary>
-    /// Pack of audio on scene
-    /// </summary>
-    List<String> downloadedAudio;
-    List<String> downloaded3D;
-    Dictionary<String, GameObject> models;
 
 
     [Header("Debug mode")] [SerializeField]
@@ -124,10 +116,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
     private async Task Start()
     {
         DetermineApplicationPlatform();
-        //
-        downloaded3D = new List<String>();
-        downloadedAudio = new List<String>();
-        models = new Dictionary<String, GameObject>();
+
+        notInitedGeoObjects = new List<string>();
 
         _arSessionOrigin = GameObject.FindWithTag("ARSessionOrigin");
         _mainCamera = Camera.main;
@@ -318,13 +308,23 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 }
                 else if (geoObject is Geo3dObject geo3dObject)
                 {
-
+                    if (accuracyOfPlacingObjectToSceneInM <= diffInMBetweenUserAndGpsOfObject &&
+                        diffInMBetweenUserAndGpsOfObject <= maxDistanceToPOIGeoobject &&
+                        accuracyOfPlacingObjectToSceneInM <= diffInMBetweenPrevObjV3LocAndNewV3LocOfObject)
+                    {
+                        geo3dObject.transform.localPosition = Vector3.Lerp(geo3dObject.transform.localPosition,
+                            positionOfGeoObject, 1f * Time.deltaTime);
+                        // Debug.Log($" {DateTime.Now:HH:mm:ss tt} Updated object localPosition of" +
+                        //           $" \"{geoObject.GetComponent<GeoPoiTextObject>().title.text}\"" +
+                        //           $" at location lat: {geoObject.gpsLocation.lat}, lng: {geoObject.gpsLocation.lng}. " +
+                        //           $"\n Updated V3 to {geoPoiTextObject.transform.localPosition}m");
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError(ex.ToString());
+            Debug.LogError(ex.Message);
         }
     }
 
@@ -406,8 +406,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
               || response.geo3dObjectModels?.Any() == true))
         {
             Debug.Log("Objects not found in this location");
-            await DeleteObjectsFromScene(packGeoObjectsFromServer);
-            return;
+            // await DeleteObjectsFromScene(packGeoObjectsFromServer);
+            // return;
         }
 
 
@@ -503,7 +503,7 @@ public class GPSPlacingBehaviour : MonoBehaviour
                 }
 
                 GameObject newGameObject =
-                    Instantiate(POI_object_text, objectPlace, Quaternion.identity) as GameObject;
+                    Instantiate(POI_object_text, objectPlace, Quaternion.identity);
 
                 newGameObject.transform.LookAt(_mainCamera.transform);
                 newGameObject.transform.SetParent(ToNorth.transform);
@@ -524,39 +524,57 @@ public class GPSPlacingBehaviour : MonoBehaviour
             }
             else if (geoObjectModel is GeoAudioObjectModel geoAudioObjectModel)
             {
-                if (!downloadedAudio.Contains(geoAudioObjectModel.id))
+                if (notInitedGeoObjects.Contains(geoAudioObjectModel.id) || geoObjectsInScene.Keys.Contains(geoAudioObjectModel.id)) 
+                    continue;
+                if (geoAudioObjectModel?.url == null)
                 {
-                    // Debug.Log("url = " + geoAudioObjectModel.url);
-                    downloadedAudio.Add(geoAudioObjectModel.id);
-                    ////////////////////////
-                    StartCoroutine(LoadAudioFromServer(geoAudioObjectModel.url, AudioType.MPEG, geoAudioObjectModel));
+                    Debug.LogError("No URL for geoObjectModel with ID " + $"{geoObjectModel.id}");
+                    continue;
                 }
+                notInitedGeoObjects.Add(geoAudioObjectModel.id);
+                
+                StartCoroutine(LoadAudioFromServer(geoAudioObjectModel.url, AudioType.MPEG, geoAudioObjectModel));
             }
             else if (geoObjectModel is Geo3dObjectModel geo3dObjectModel)
             {
-                if (!downloaded3D.Contains(geo3dObjectModel.id))
+                if (notInitedGeoObjects.Contains(geo3dObjectModel.id) || geoObjectsInScene.Keys.Contains(geo3dObjectModel.id)) 
+                    continue;
+                
+                if (geo3dObjectModel?.url == null)
                 {
-                    downloaded3D.Add(geo3dObjectModel.id);
-                    Debug.Log("url = " + geo3dObjectModel.url);
-                    downloadZip(geo3dObjectModel.url, geo3dObjectModel.id);
-                    
-                    if (models.ContainsKey(geo3dObjectModel.id))
-                    {
-                        Vector3 objectPlace =
-                GPSEncoder.GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);
-                        
-                        Debug.Log("LoadFromFile");
-                        GameObject newGameObject =
-                                Instantiate(models[geo3dObjectModel.id], objectPlace, Quaternion.identity) as GameObject;
-                        newGameObject.name = geo3dObjectModel.name;
-                        Debug.Log("Instantiate");
-                    }
+                    Debug.LogError("No URL for geoObjectModel with ID " + $"{geoObjectModel.id}");
+                    continue;
+                }
+                
+                notInitedGeoObjects.Add(geo3dObjectModel.id);
+                var extractedZipFileName = geo3dObjectModel.id + ".zip";
+                if (File.Exists(Path.Combine(Application.persistentDataPath, "DownloadedFiles",
+                    extractedZipFileName)))
+                {
+                    ExtractAndInstantiate3dObject(extractedZipFileName, geo3dObjectModel);
+                }
+                else
+                {
+                    StartCoroutine(GetFileRequest(geo3dObjectModel.url,
+                        extractedZipFileName,
+                        (UnityWebRequest req) =>
+                        {
+                            if (req.result != UnityWebRequest.Result.Success)
+                            {
+                                // Log any errors that may happen
+                                Debug.Log($"{req.error}");
+                            } else
+                            {
+                                // Save the model into a new wrapper
+                                ExtractAndInstantiate3dObject(extractedZipFileName, geo3dObjectModel);
+                            }
+                        }));
                 }
 
             }
         }
     }
-
+    
     private string DegreesToCardinalDetailed(float degrees)
     {
         string[] caridnals =
@@ -688,99 +706,115 @@ public class GPSPlacingBehaviour : MonoBehaviour
         AudioType audioType,
         GeoAudioObjectModel audioObj)
     {
-        var request = UnityWebRequestMultimedia.GetAudioClip(url, audioType);
-        // Debug.Log("1!!!");
-        yield return request.SendWebRequest();
-
-
-        if (!request.isHttpError && !request.isNetworkError)
+        using (var request = UnityWebRequestMultimedia.GetAudioClip(url, audioType))
         {
-            //////////////////////
-            Vector3 objectPlace =
-                GPSEncoder.GPSToUCS(audioObj.position.lat, audioObj.position.lng);
-
-            // if distance to POI greater then maxDistanceToPOIGeoObject units then normalize to maxDistanceToPOIGeoObject
-            double diffInMBetweenUserAndGpsOfObject = DistanceBetween2GeoobjectsInM(currentLocation.lat,
-                currentLocation.lng, audioObj.position.lat, audioObj.position.lng);
+            yield return request.SendWebRequest();
 
 
-            GameObject newGameObject =
-                Instantiate(audioPrefabGameObject, objectPlace, Quaternion.identity) as GameObject;
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                    Debug.LogErrorFormat("error request [{0}, {1}]", url, request.error);
+            }
+            else
+            {
+                Vector3 objectPlace =
+                    GPSEncoder.GPSToUCS(audioObj.position.lat, audioObj.position.lng);
+            
+                GameObject newGameObject =
+                    Instantiate(audioPrefabGameObject, objectPlace, Quaternion.identity) as GameObject;
 
-            newGameObject.transform.SetParent(ToNorth.transform);
-            newGameObject.tag = nameof(GeoAudioObject);
-            newGameObject.name = audioObj.name;
-            // Debug.Log("2!!!");
-            AudioClip audio = DownloadHandlerAudioClip.GetContent(request);
-            // Debug.Log(newGameObject.GetComponent<GeoAudioObject>() + "       ");
-            // init content of geoObject(point of interest)
-            newGameObject.GetComponent<GeoAudioObject>()
-                .Initialize(audioObj, audio);
-            // Debug.Log("3!!!");
-            Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {audioObj.name} " +
-                      $"at location lat: {audioObj.position.lat}, lng: {audioObj.position.lng}. " +
-                      $"\n Updated Distance to {diffInMBetweenUserAndGpsOfObject}m");
+                newGameObject.transform.SetParent(ToNorth.transform);
+                newGameObject.tag = nameof(GeoAudioObject);
+                newGameObject.name = audioObj.name;
 
-            // add to dict of initedGeoObjects
-            geoObjectsInScene.Add(audioObj.id, newGameObject);
-            newGameObject.GetComponent<AudioSource>().volume = 0;
-            newGameObject.GetComponent<AudioSource>().Play();
+                AudioClip audio = DownloadHandlerAudioClip.GetContent(request);
 
-            ///////////////////////
-            ///audioSource.Play();
+                newGameObject.GetComponent<GeoAudioObject>().Initialize(audioObj, audio);
+            
+                Debug.Log($" {DateTime.Now:HH:mm:ss tt} Placed object {audioObj.name} " +
+                          $"at location lat: {audioObj.position.lat}, lng: {audioObj.position.lng}");
+
+                newGameObject.GetComponent<AudioSource>().volume = 0;
+                newGameObject.GetComponent<AudioSource>().Play();
+            
+                // add to dict of initedGeoObjects
+                geoObjectsInScene.Add(audioObj.id, newGameObject);
+                notInitedGeoObjects.Remove(audioObj.id);
+            }
+            
         }
-        else
-        {
-            Debug.LogErrorFormat("error request [{0}, {1}]", url, request.error);
-        }
-
-        request.Dispose();
     }
 
     void OnApplicationQuit()
     {
-        Directory.Delete("dowloads/", true);
-        Debug.Log("1!!!");
+        if(Directory.Exists(Application.persistentDataPath + "/DownloadedFiles/"))
+            Directory.Delete(Application.persistentDataPath + "/DownloadedFiles/", true);
     }
 
-    private void downloadZip(String url, String id)
+    IEnumerator GetFileRequest(string url, string fileName, Action<UnityWebRequest> callback)
     {
-        webClient = new WebClient();
-        webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(Completed);
-        webClient.QueryString.Add("id", id);
-        webClient.DownloadFileAsync(new Uri(url), id + ".zip");
+        using(UnityWebRequest req = new UnityWebRequest(url, UnityWebRequest.kHttpVerbGET))
+        {
+            req.downloadHandler = new DownloadHandlerFile(Path.Combine(Application.persistentDataPath, "DownloadedFiles", fileName));
+            yield return req.SendWebRequest();
+            callback(req);
+        }
     }
-
-    private void Completed(object sender, AsyncCompletedEventArgs e)
+    private void ExtractAndInstantiate3dObject(string extractedZipFileName, Geo3dObjectModel geo3dObjectModel)
     {
-        string id = ((System.Net.WebClient)(sender)).QueryString["id"];
-        webClient = null;
-        Debug.Log("Download completed!");
-        //extractZip(id);
-        ZipFile.ExtractToDirectory(id + ".zip", "dowloads/" + id);
-        File.Delete(id + ".zip");
-        Debug.Log("Extract completed!");
-        GameObject model = Importer.LoadFromFile("dowloads/" + id + "/scene.gltf");
-        models.Add(id, model);
-        Debug.Log("Here2");
+        var extractDirectoryName = Path.Combine(Application.persistentDataPath,
+            "DownloadedFiles", geo3dObjectModel.id);
+        var resultFilePath = Path.Combine(Application.persistentDataPath,"DownloadedFiles", extractedZipFileName);
+        if (!Directory.Exists(extractDirectoryName))
+        {
+            Debug.Log("Extract zip file started");
 
+            ZipFile.ExtractToDirectory(resultFilePath, extractDirectoryName);
+        
+            Debug.Log("Extract completed!");
+        }
+        
+        Instantiate3dModel(geo3dObjectModel, extractDirectoryName);
     }
-
     
-    //private String extract(String id)
-    //{
+    void Instantiate3dModel(Geo3dObjectModel geo3dObjectModel, string extractedZipPath) {
+        try
+        {
+            // First step: load glTF
+            var gltf = new GLTFast.GltfImport();
+            Vector3 objectPlace = GPSEncoder
+                .GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);
         
-        
-    //}
+            GameObject newGameObject = new GameObject(geo3dObjectModel.id);
+            newGameObject.transform.LookAt(_mainCamera.transform);
+            newGameObject.transform.SetParent(ToNorth.transform);
+            newGameObject.transform.position = objectPlace;
+            newGameObject.AddComponent<Geo3dObject>();
+            newGameObject.tag = nameof(Geo3dObject);
 
-    //async private void extractZip(String id)
-    //{
-    //    await Task.Run(() => extract(id));
-    //}
+            Debug.Log("Import model with id= " + geo3dObjectModel.id + " started");
+            var gltfFilePath = Path.Combine(extractedZipPath, "scene.gltf");
+            gltf
+                .Load(gltfFilePath)
+                .ContinueWith((t) =>
+            {
+                Debug.Log("Import model with id= " + geo3dObjectModel.id + " ended");
+            
+                gltf.InstantiateMainScene(newGameObject.transform);
+                // add to dict of initedGeoObjects
+                geoObjectsInScene.Add(geo3dObjectModel.id, newGameObject);
+                notInitedGeoObjects.Remove(geo3dObjectModel.id);
+                
+                newGameObject.GetComponent<Geo3dObject>().Initialize(geo3dObjectModel);
 
-    //void ResetWrapper()
-    //{
-
-    //}
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("Loading glTF failed!");
+            throw new Exception(e.Message);
+        }
+    }
 
 }
+

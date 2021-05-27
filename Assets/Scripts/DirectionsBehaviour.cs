@@ -178,15 +178,22 @@ public class DirectionsBehaviour : MonoBehaviour
          requestString += "?" + queryString.ToString();
          UnityWebRequest www = UnityWebRequest.Get(requestString);
          www.SetRequestHeader("Authorization", "Bearer " + _authToken);
-         
+         // www.timeout = 4;
+
+         var time = DateTime.Now.Second;
+
          yield return www.SendWebRequest();
          
          if (www.result != UnityWebRequest.Result.Success) {
              Debug.LogError(www.error);
+             Debug.LogError(www.result);
+             Debug.LogError(www.downloadHandler.text);
              displayDropdownMessage.text = "До данного объекта не получается проложить маршрут";
              yield break;
          }
-
+    
+        var elapsedTime = DateTime.Now.Second - time;
+        Debug.Log( "Elapsed time " + elapsedTime.ToString());
         string responseText = www.downloadHandler.text;
 
         ResponseFromServerOneToOneDirectionModel response = null;

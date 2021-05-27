@@ -13,10 +13,6 @@ namespace UnityModels
     /// </summary>
     public class GeoPoiTextObject : GeoObject
     {
-        public GeoPoiTextObject():base()
-        {
-
-        }
         [SerializeField]
         public TextMeshProUGUI title;
         [SerializeField]
@@ -25,11 +21,11 @@ namespace UnityModels
         public TextMeshProUGUI distance;
         public void Initialize(GeoPoiObjectModel geoObjectModel, double distance)
         {
-            this.id = geoObjectModel.id;
-            this.title.text = geoObjectModel.name;
-            this.description.text = geoObjectModel.description;
-            this.gpsLocation.lat = geoObjectModel.position.lat;
-            this.gpsLocation.lng = geoObjectModel.position.lng;
+            id = geoObjectModel.id;
+            title.text = geoObjectModel.name;
+            description.text = geoObjectModel.description;
+            gpsLocation.lat = geoObjectModel.position.lat;
+            gpsLocation.lng = geoObjectModel.position.lng;
             this.distance.text = Convert.ToUInt32(distance).ToString() + " meters";
             Debug.Log("initialized " + geoObjectModel.name);
         }
