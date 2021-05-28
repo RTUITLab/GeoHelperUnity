@@ -790,6 +790,9 @@ public class GPSPlacingBehaviour : MonoBehaviour
             newGameObject.transform.SetParent(ToNorth.transform);
             newGameObject.transform.position = objectPlace;
             newGameObject.AddComponent<Geo3dObject>();
+            newGameObject.AddComponent<SphereCollider>();
+            newGameObject.GetComponent<SphereCollider>().radius = 8;
+            newGameObject.GetComponent<SphereCollider>().isTrigger = true;
             newGameObject.tag = nameof(Geo3dObject);
 
             Debug.Log("Import model with id= " + geo3dObjectModel.id + " started");
