@@ -783,8 +783,8 @@ public class GPSPlacingBehaviour : MonoBehaviour
             // First step: load glTF
             var gltf = new GLTFast.GltfImport();
             Vector3 objectPlace = GPSEncoder
-                .GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);
-        
+                .GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);            
+            
             GameObject newGameObject = new GameObject(geo3dObjectModel.id);
             newGameObject.transform.LookAt(_mainCamera.transform);
             newGameObject.transform.SetParent(ToNorth.transform);
