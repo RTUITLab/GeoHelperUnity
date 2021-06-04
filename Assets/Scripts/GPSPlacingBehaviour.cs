@@ -785,13 +785,13 @@ public class GPSPlacingBehaviour : MonoBehaviour
             Vector3 objectPlace = GPSEncoder
                 .GPSToUCS(geo3dObjectModel.position.lat, geo3dObjectModel.position.lng);            
             
-            GameObject newGameObject = new GameObject(geo3dObjectModel.id);
+            GameObject newGameObject = new GameObject(geo3dObjectModel.name);
             newGameObject.transform.LookAt(_mainCamera.transform);
             newGameObject.transform.SetParent(ToNorth.transform);
             newGameObject.transform.position = objectPlace;
             newGameObject.AddComponent<Geo3dObject>();
             newGameObject.AddComponent<SphereCollider>();
-            newGameObject.GetComponent<SphereCollider>().radius = 8;
+            newGameObject.GetComponent<SphereCollider>().radius = 12;
             newGameObject.GetComponent<SphereCollider>().isTrigger = true;
             newGameObject.tag = nameof(Geo3dObject);
 

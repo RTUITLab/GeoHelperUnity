@@ -1172,7 +1172,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1
+  m_Radius: 12
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &850519532
 GameObject:
@@ -1624,7 +1624,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1448312108
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2604,7 +2604,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1760703bbd54c04488a8d10600262ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PlanePrefab: {fileID: 0}
+  m_PlanePrefab: {fileID: 1316128532249476238, guid: 4b48de59e831c421a8b8a3a5da2a98a7,
+    type: 3}
   m_DetectionMode: 1
 --- !u!114 &2027015977
 MonoBehaviour:
@@ -2631,7 +2632,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab0e80cee9cc1d44928bfe488dd1e2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PointCloudPrefab: {fileID: 0}
+  m_PointCloudPrefab: {fileID: 1225664791276931795, guid: bbbe0104d625b4e6f89fec0dbcfe239c,
+    type: 3}
 --- !u!1 &2029881535
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,35 +22,76 @@ namespace UnityModels
         private static List<ARRaycastHit> s_Hits = new List<ARRaycastHit>();
 
         private ARRaycastManager m_RaycastManager;
+        ARPlaneManager m_PlaneManager;
         
-        void Awake()
+        void Start()
         {
             m_RaycastManager = GameObject.FindObjectOfType<ARRaycastManager>();
+            m_PlaneManager = GameObject.FindObjectOfType<ARPlaneManager>();
         }
 
         private void OnTriggerEnter(Collider other)
         {
             try
             {
+                Debug.Log("Got trigger enter");
                 if (other.CompareTag("MainCamera"))
                 {
+                    Debug.Log("Collision with MainCamera");
                     var touchPosition = new Vector2(Screen.width / 2, Screen.height / 2);
-                    if (m_RaycastManager.Raycast(touchPosition, s_Hits, TrackableType.PlaneWithinPolygon))
+                    if (!m_RaycastManager)
+                    {
+                        Debug.Log("m_RaycastManager not defined");
+                        return;
+                    }
+                    if (m_RaycastManager && m_RaycastManager.Raycast(touchPosition, s_Hits, TrackableType.Planes))
                     {
                         // Raycast hits are sorted by distance, so the first one
                         // will be the closest hit.
-                        var hitPose = s_Hits[0].pose;
-
-                        var hitPose_y = hitPose.position.y;
-
-                        var currentPosition = GetComponent<Transform>().position;
-                        currentPosition.y = hitPose_y;
+                        if (s_Hits.Count == 0)
+                        {
+                            Debug.Log("s_Hits is 0");
+                            return;
+                        }
+                        var hit = s_Hits[0];
+                        // Determine if it is a plane
+                        if ((hit.hitType & TrackableType.Planes) != 0)
+                        {
+                            // Look up the plane by id
+                            Debug.Log("Before planeManager");
+                            if (!m_PlaneManager)
+                            {
+                                Debug.Log("m_PlaneManager not defined");
+                                return;
+                            }
+                                
+                            var plane = m_PlaneManager.GetPlane(hit.trackableId);
+                            if (!plane)
+                            {
+                                Debug.Log("m_PlaneManager not defined");
+                                return;
+                            }
+                            
+                            // Do something with 'plane':
+                            Debug.Log($"Hit a plane with alignment {plane.alignment} and y {plane.center.y}");
+                            var hitPose_y  = plane.center.y;
+                            var currentPosition = GetComponent<Transform>().position;
+                            Debug.Log($"Previous pos ${currentPosition.y}");
+                            currentPosition.y = hitPose_y;
+                            Debug.Log($"Current pos ${currentPosition.y}");
+                        }
+                        else
+                        {
+                            // What type of thing did we hit?
+                            // Debug.Log($"Raycast hit a {hit.hitType}");
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
+                Debug.LogError(e.Message);
             }
 
         }        
@@ -59,25 +100,65 @@ namespace UnityModels
         {
             try
             {
-                var currentPosition = GetComponent<Transform>().position;
-                if (other.CompareTag("MainCamera") && currentPosition.y.Equals(0))
+                if (other.CompareTag("MainCamera"))
                 {
+                    var currentPosition = GetComponent<Transform>().position;
+                    if(currentPosition.y != 0)
+                        return;
                     var touchPosition = new Vector2(Screen.width / 2, Screen.height / 2);
-                    if (m_RaycastManager.Raycast(touchPosition, s_Hits, TrackableType.PlaneWithinPolygon))
+                    if (!m_RaycastManager)
+                    {
+                        Debug.Log("m_RaycastManager not defined");
+                        return;
+                    }
+                    if (m_RaycastManager && m_RaycastManager.Raycast(touchPosition, s_Hits, TrackableType.Planes))
                     {
                         // Raycast hits are sorted by distance, so the first one
                         // will be the closest hit.
-                        var hitPose = s_Hits[0].pose;
-
-                        var hitPose_y = hitPose.position.y;
-                        
-                        currentPosition.y = hitPose_y;
+                        if (s_Hits.Count == 0)
+                        {
+                            Debug.Log("s_Hits is 0");
+                            return;
+                        }
+                        var hit = s_Hits[0];
+                        // Determine if it is a plane
+                        if ((hit.hitType & TrackableType.Planes) != 0)
+                        {
+                            // Look up the plane by id
+                            Debug.Log("Before planeManager");
+                            if (!m_PlaneManager)
+                            {
+                                Debug.Log("m_PlaneManager not defined");
+                                return;
+                            }
+                                
+                            var plane = m_PlaneManager.GetPlane(hit.trackableId);
+                            if (!plane)
+                            {
+                                Debug.Log("m_PlaneManager not defined");
+                                return;
+                            }
+                            
+                            // Do something with 'plane':
+                            Debug.Log($"Hit a plane with alignment {plane.alignment} and y {plane.center.y}");
+                            var hitPose_y  = plane.center.y;
+                            
+                            Debug.Log($"Previous pos ${currentPosition.y}");
+                            currentPosition.y = hitPose_y;
+                            Debug.Log($"Current pos ${currentPosition.y}");
+                        }
+                        else
+                        {
+                            // What type of thing did we hit?
+                            // Debug.Log($"Raycast hit a {hit.hitType}");
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
+                Debug.LogError(e.Message);
             }
 
         }
